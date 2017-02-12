@@ -1,8 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import sys
 from collections import deque
 
-print("arg list: " + str(sys.argv))
+##print("arg list: " + str(sys.argv))
 
 # global variables
 input_file = sys.argv[1]
@@ -23,7 +23,7 @@ def readFile(fileName):
 
     for line in f:
         # split each line (by space character) into array of ints
-        vals = map(int, line.split())
+        vals = list(map(int, line.split()))
 
         source = vals[0] # the edge's source node
         dest = vals[1]   # the edge's destination node
@@ -67,7 +67,7 @@ def writeNode(id1, id2):
 
 def BFS(id):
     if id == end_node:
-        print "*** at goal node: " + str(id)
+        ##print "*** at goal node: " + str(id)
         res = []
         cur = id
 
@@ -75,36 +75,36 @@ def BFS(id):
             res = [cur] + res
             cur = added[cur]
 
-        print("SOLUTION:")
+        ##print("SOLUTION:")
         print(res)
 
-    else:
-        print("at node " + str(id))
+    ##else:
+        ##print("at node " + str(id))
 
     for n in nodes[int(id)]:
         # check that the neighbors haven't been already added
         if n not in added:
-            print(" -adding " + str(n))
+            ##print(" -adding " + str(n))
             q.append(int(n)) # add the connected nodes to the queue
             added[n] = id # indicate that this node is already in the queue
 
     # when q not empty
     if q:
-        print(added)
+        ##print(added)
         BFS(int(q.popleft()))
 
 
 
 readFile(input_file)
 
-print("\nnodes:")
-print(nodes)
-print("\nweights:")
-print(weights)
+##print("\nnodes:")
+##print(nodes)
+##print("\nweights:")
+##print(weights)
 
 q.append(start_node)
 added[start_node] = None
 
 BFS(int(q.popleft()))
 
-print("\n")
+##print("\n")
