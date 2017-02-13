@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import sys
 from collections import deque
+import queue
 
-##print("arg list: " + str(sys.argv))
+print("arg list: " + str(sys.argv))
 
 # global variables
 input_file = sys.argv[1]
@@ -17,11 +18,14 @@ added = {}    # (dictionary) of already explored/expanded nodes
 weights = {}  # dictionary of the weights of the edges between connected nodes
 q = deque([]) # FIFO queue
 
+
+
 # read data from input file and store it
 def readFile(fileName):
     f = open(fileName, "r") # open file for reading
 
     for line in f:
+        ##print(line)
         # split each line (by space character) into array of ints
         vals = list(map(int, line.split()))
 
@@ -66,17 +70,6 @@ def writeNode(id1, id2):
 
 
 def BFS(id):
-    if id == end_node:
-        ##print "*** at goal node: " + str(id)
-        res = []
-        cur = id
-
-        while cur != None:
-            res = [cur] + res
-            cur = added[cur]
-
-        ##print("SOLUTION:")
-        print(res)
 
     ##else:
         ##print("at node " + str(id))
@@ -93,7 +86,47 @@ def BFS(id):
         ##print(added)
         BFS(int(q.popleft()))
 
+    else:
+    #if id == end_node:
+        ##print "*** at goal node: " + str(id)
+        res = []
+        cur = end_node
 
+        while cur != None:
+            res = [cur] + res
+            cur = added[cur]
+
+        ##print("SOLUTION:")
+        print(res)
+
+
+def UCS():
+
+    if not q.empty():
+        cur = q.get()
+        id = int(cur[1])
+        weight = int(cur[0])
+        print(str(cur[0]) + ", " + str(id))
+
+        for n in nodes[int(id)]:
+            if n not in added:
+                print(" -adding " + str(n))
+                total_weight = weight + getWeight(id, n)
+                q.put((total_weight, n)) # add the connected nodes to the queue
+                added[n] = id # indicate that this node is already in the queue
+                              # remeber the ID of its parent
+
+        UCS()
+    else:
+        res = []
+        cur = end_node
+
+        while cur != None:
+            res = [cur] + res
+            cur = added[cur]
+
+        print("SOLUTION:")
+        print(res)
 
 readFile(input_file)
 
@@ -102,9 +135,18 @@ readFile(input_file)
 ##print("\nweights:")
 ##print(weights)
 
-q.append(start_node)
-added[start_node] = None
+if search_type == "BFS":
+    q.append(start_node)
+    added[start_node] = None
 
-BFS(int(q.popleft()))
+    BFS(int(q.popleft()))
+
+if search_type == "UCS":
+    ##print("performing UCS")
+    q = queue.PriorityQueue()
+    q.put((0, start_node)) # insert this tuple (priority, id) into the priority queue
+    added[start_node] = None
+    UCS()
+
 
 ##print("\n")
