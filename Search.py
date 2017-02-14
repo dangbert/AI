@@ -2,8 +2,10 @@
 import sys
 from collections import deque
 import queue
+sys.path.append("/pqdict")
+from pqdict import pqdict # http://pqdict.readthedocs.io/en/latest/pqdict.html#pqdict-class
 
-print("arg list: " + str(sys.argv))
+#print("arg list: " + str(sys.argv))
 
 # global variables
 input_file = sys.argv[1]
@@ -15,8 +17,11 @@ nodes = {}    # dictionary storing the neighbors of each node
 # TODO: consider renaming to 'discovered'
 added = {}    # (dictionary) of already explored/expanded nodes
               # nodes are paired with the id of their parents
+
 weights = {}  # dictionary of the weights of the edges between connected nodes
 q = deque([]) # FIFO queue
+
+
 
 
 
@@ -101,32 +106,58 @@ def BFS(id):
 
 
 def UCS():
+    pq = pqdict({start_node: 0})
 
-    if not q.empty():
-        cur = q.get()
-        id = int(cur[1])
-        weight = int(cur[0])
-        print(str(cur[0]) + ", " + str(id))
+    visited = {}
+    parent = {start_node: None}
 
-        for n in nodes[int(id)]:
-            if n not in added:
-                print(" -adding " + str(n))
-                total_weight = weight + getWeight(id, n)
-                q.put((total_weight, n)) # add the connected nodes to the queue
-                added[n] = id # indicate that this node is already in the queue
-                              # remeber the ID of its parent
+    while True:
+        try:
+            cur_cost = pq[pq.top()]
+            cur = pq.pop() # ID of the node that we're currently visiting
+            #print("\npopped " + str(cur) + ", " + str(cur_cost))
 
-        UCS()
-    else:
-        res = []
-        cur = end_node
+            for n in nodes[int(cur)]: # neighbors of current node
+                if n not in visited:
+                    #print(" -at neighbor " + str(n))
+                    # calculate the distance to n
+                    n_cost = cur_cost + getWeight(cur, n)
+                    #print("    cost to " + str(n) + ": " + str(n_cost))
 
-        while cur != None:
-            res = [cur] + res
-            cur = added[cur]
+                    if n in pq:
+                        #print("    already in pq")
+                        if n_cost < pq[n]:
+                            pq[n] = n_cost # update priority
+                            parent[n] = cur # update parent
+                            #print("    *updated priority")
+                        #else:
 
-        print("SOLUTION:")
-        print(res)
+                            #print("    " + str(n) + " has lower (existing) cost " + str(pq[n]))
+                    else:
+                        # add to priority queue
+                        #print("    ADDING to queue")
+                        pq[n] = n_cost
+                        parent[n] = cur
+
+            visited[cur] = None
+            if cur == end_node:
+                break
+
+
+            #pq['a'] = 99 # updates the priority of 'a'
+
+        except KeyError:
+            break
+
+    # queue is now empty
+    res = []
+    temp = end_node
+
+    while temp != None:
+        res = [temp] + res
+        temp = parent[temp]
+    print(res)
+
 
 readFile(input_file)
 
@@ -142,10 +173,6 @@ if search_type == "BFS":
     BFS(int(q.popleft()))
 
 if search_type == "UCS":
-    ##print("performing UCS")
-    q = queue.PriorityQueue()
-    q.put((0, start_node)) # insert this tuple (priority, id) into the priority queue
-    added[start_node] = None
     UCS()
 
 
