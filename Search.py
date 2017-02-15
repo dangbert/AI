@@ -20,9 +20,7 @@ added = {}    # (dictionary) of already explored/expanded nodes
 
 weights = {}  # dictionary of the weights of the edges between connected nodes
 q = deque([]) # FIFO queue
-
-
-
+stack = []    # list used as a stack
 
 
 # read data from input file and store it
@@ -67,25 +65,50 @@ def writeNode(id1, id2):
         nodes[id1] = []
     nodes[id1].append(id2)
 
-    if id2 not in nodes:
-        nodes[id2] = []
-    nodes[id2].append(id1)
+    # this is a directional graph, not bidirectional!
+    #if id2 not in nodes:
+    #    nodes[id2] = []
+    #nodes[id2].append(id1)
 
 
 def BFS(id):
-    for n in nodes[int(id)]:
-        # check that the neighbors haven't been already added
-        if n not in added:
-            q.append(int(n)) # add the connected nodes to the queue
-            added[n] = id    # indicate that this node is already in the queue
-                             # and store its parent
+    if id in nodes:
+        for n in nodes[int(id)]:
+            # check that the neighbors haven't been already added
+            if n not in added:
+                q.append(int(n)) # add the connected nodes to the queue
+                added[n] = id    # indicate that this node is already in the queue
+                                 # and store its parent
 
     # when q not empty
     if q:
         BFS(int(q.popleft()))
 
     else:
-    #if id == end_node:
+        res = []
+        cur = end_node
+
+        while cur != None:
+            res = [cur] + res
+            cur = added[cur]
+
+        print(res)
+
+def DFS(id):
+    #print(" DFS, ID = " + str(id))
+    if id in nodes:
+        for n in nodes[int(id)]:
+            # check that the neighbors haven't been already added
+            if n not in added:
+                stack.append(int(n)) # add the connected nodes to the queue
+                added[n] = id    # indicate that this node is already in the queue
+    #else:
+    #    print(" ... not in nodes")
+
+    if stack:
+        DFS(int(stack.pop()))
+
+    else:
         res = []
         cur = end_node
 
@@ -160,8 +183,12 @@ for n in nodes:
 if search_type == "BFS":
     q.append(start_node)
     added[start_node] = None
-
     BFS(int(q.popleft()))
+
+if search_type == "DFS":
+    stack.append(start_node)
+    added[start_node] = None
+    DFS(int(stack.pop()))
 
 if search_type == "UCS":
     UCS()
