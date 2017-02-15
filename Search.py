@@ -61,8 +61,6 @@ def edgeName(id1, id2):
     return str(id1) + "-" + str(id2)
 
 
-# TODO: nodes should be added to in numerical order to your expansion data structure.
-#       can we assume the data is provided in numerical order?
 # @param id1, id2: int IDs of the node and its neighbor
 def writeNode(id1, id2):
     if id1 not in nodes:
@@ -75,25 +73,19 @@ def writeNode(id1, id2):
 
 
 def BFS(id):
-
-    ##else:
-        ##print("at node " + str(id))
-
     for n in nodes[int(id)]:
         # check that the neighbors haven't been already added
         if n not in added:
-            ##print(" -adding " + str(n))
             q.append(int(n)) # add the connected nodes to the queue
-            added[n] = id # indicate that this node is already in the queue
+            added[n] = id    # indicate that this node is already in the queue
+                             # and store its parent
 
     # when q not empty
     if q:
-        ##print(added)
         BFS(int(q.popleft()))
 
     else:
     #if id == end_node:
-        ##print "*** at goal node: " + str(id)
         res = []
         cur = end_node
 
@@ -101,7 +93,6 @@ def BFS(id):
             res = [cur] + res
             cur = added[cur]
 
-        ##print("SOLUTION:")
         print(res)
 
 
@@ -159,12 +150,12 @@ def UCS():
     print(res)
 
 
-readFile(input_file)
 
-##print("\nnodes:")
-##print(nodes)
-##print("\nweights:")
-##print(weights)
+readFile(input_file)
+# sort nodes by increasing ID
+for n in nodes:
+    nodes[n] = sorted(nodes[n])
+
 
 if search_type == "BFS":
     q.append(start_node)
