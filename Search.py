@@ -11,11 +11,8 @@ class GraphSearch:
     # constructor
     def __init__(self, input_file):
         self._nodes = {}    # dictionary storing the neighbors each node can access
-        self._added = {}    # (dictionary) of already discovered nodes
-                            # TODO: make added a set called discovered
-                            # TODO: use parent instead to remember parents
-                            # nodes are paired with the id of their parents
-        self._parent = {}
+        self._added = set() # (dictionary) of already discovered nodes
+        self._parent = {}   # remember the parent of each traversed node
 
         self._weights = {}  # dictionary of the weights of the edges between connected nodes
         self._q = deque([]) # FIFO queue
@@ -38,7 +35,7 @@ class GraphSearch:
 
             # store the weight of this edge
             self._weights[self._edgeName(source, dest)] = weight
-            self._writeNode(source, dest) # remember that these nodes are connected
+            self._writeEdge(source, dest) # remember that these nodes are connected
         f.close()
 
         # sort node neighbors by increasing ID
@@ -50,7 +47,7 @@ class GraphSearch:
     def BFS(self, start_node, end_node):
         self._q.append(start_node)
         self._parent[start_node] = None
-        self._added[start_node] = 1
+        self._added.add(start_node)
 
         while self._q:
             id = int(self._q.popleft())
@@ -58,47 +55,42 @@ class GraphSearch:
                 for n in self._nodes[int(id)]:
                     # check that the neighbors haven't been already added
                     if n not in self._added:
-                        self._added[n] = 1     # indicate that this node is already in the queue
+                        self._added.add(n)     # indicate that this node is already in the queue
                         self._q.append(int(n)) # add the connected nodes to the queue
-                        self._parent[n] = id # update parent
-                                         # and store its parent
-        self._printResults(self._parent, end_node)   # print results
+                        self._parent[n] = id   # update parent
+        self._printResults(end_node)           # print results
 
 
     def DFS(self, start_node, end_node):
         self._parent = {start_node: None}
         self._stack.append(start_node)
-        self._added[start_node] = 1
-        found = False
+        self._added.add(start_node)
 
-        while self._stack and not found:                         # stack not empty
+        # while stack not empty
+        while self._stack:
             id = int(self._stack.pop())
 
             if id in self._nodes:
                 for n in reversed(self._nodes[int(id)]):
                     # check that the neighbors haven't been already added
                     if n not in self._added:
-                        # TODO: consider using set instead of dictionary (for added)
-                        self._added[n] = 1          # indicate that this node is already in the queue
-                        self._stack.append(int(n))  # add the connected nodes to the queue
-                        self._parent[n] = id # update parent
-                        if n == end_node:
-                            found = True
-                            break
-        self._printResults(self._parent, end_node)
+                        self._added.add(n)             # indicate that this node is already in the queue
+                        self._stack.append(int(n))     # add the connected nodes to the queue
+                        self._parent[n] = id           # update parent
+        self._printResults(end_node)
 
 
     def UCS(self, start_node, end_node):
-        pq = pqdict({start_node: 0})             # priority queue
+        pq = pqdict({start_node: 0})                   # priority queue
         visited = {}
         self._parent = {start_node: None}
 
         while True:
             try:
                 cur_cost = pq[pq.top()]
-                cur = int(pq.pop()) # ID of the node that we're currently visiting
+                cur = int(pq.pop())                    # ID of the node we're currently visiting
 
-                for n in self._nodes[cur]: # neighbors of current node
+                for n in self._nodes[cur]:             # neighbors of current node
                     if n not in visited:
                         # calculate the cost to reach node n
                         n_cost = cur_cost + self._getWeight(cur, n)
@@ -106,10 +98,10 @@ class GraphSearch:
                         if n in pq:
                             if n_cost < pq[n]:
                                 # cheaper route to node discovered
-                                pq[n] = n_cost   # update priority
+                                pq[n] = n_cost         # update priority
                                 self._parent[n] = cur  # update parent
                         else:
-                            pq[n] = n_cost       # add to priority queue
+                            pq[n] = n_cost             # add to priority queue
                             self._parent[n] = cur      # remember how we reached n
 
                 visited[cur] = None
@@ -119,19 +111,18 @@ class GraphSearch:
             except KeyError:
                 # priority queue is empty
                 break
-        self._printResults(self._parent, end_node)
+        self._printResults(end_node)
 
 
     # prints the final results as an array of node IDs
-    # TODO: use self._parent instead after fixing added
-    def _printResults(self, parent, end_node):
-        res = []               # array of the order to visit the nodes
+    def _printResults(self, end_node):
+        res = []          # array of the order to visit the nodes
         temp = end_node
 
-        if end_node in parent:
+        if end_node in self._parent:
             while temp != None:
                 res = [temp] + res
-                temp = parent[temp]
+                temp = self._parent[temp]
         print(res)
 
 
@@ -150,9 +141,8 @@ class GraphSearch:
         return str(id1) + "-" + str(id2)
 
 
-    # TODO: rename writeEdge
     # add an edge to the graph pointing from src node to dest node
-    def _writeNode(self, src, dest):
+    def _writeEdge(self, src, dest):
         if src not in self._nodes:
             self._nodes[src] = []
         self._nodes[src].append(dest)
