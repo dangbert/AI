@@ -46,55 +46,48 @@ class GraphSearch:
             self._nodes[n] = sorted(self._nodes[n])
 
 
+    # TODO: reset everything after doing a graph search and printing results
     def BFS(self, start_node, end_node):
         self._q.append(start_node)
-        self._added[start_node] = None
-        self._BFS_helper(int(self._q.popleft()))
+        self._parent[start_node] = None
+        self._added[start_node] = 1
 
-        self._printResults(self._added, end_node)
+        while self._q:
+            id = int(self._q.popleft())
+            if id in self._nodes:
+                for n in self._nodes[int(id)]:
+                    # check that the neighbors haven't been already added
+                    if n not in self._added:
+                        self._added[n] = 1     # indicate that this node is already in the queue
+                        self._q.append(int(n)) # add the connected nodes to the queue
+                        self._parent[n] = id # update parent
+                                         # and store its parent
+        self._printResults(self._parent, end_node)   # print results
+
 
     def DFS(self, start_node, end_node):
         self._parent = {start_node: None}
         self._stack.append(start_node)
         self._added[start_node] = 1
-        self._DFS_helper(int(self._stack.pop()))
+        found = False
 
+        while self._stack and not found:                         # stack not empty
+            id = int(self._stack.pop())
+
+            if id in self._nodes:
+                for n in reversed(self._nodes[int(id)]):
+                    # check that the neighbors haven't been already added
+                    if n not in self._added:
+                        # TODO: consider using set instead of dictionary (for added)
+                        self._added[n] = 1          # indicate that this node is already in the queue
+                        self._stack.append(int(n))  # add the connected nodes to the queue
+                        self._parent[n] = id # update parent
+                        if n == end_node:
+                            found = True
+                            break
         self._printResults(self._parent, end_node)
 
-    def _BFS_helper(self, id):
-        if id in self._nodes:
-            for n in self._nodes[int(id)]:
-                # check that the neighbors haven't been already added
-                if n not in self._added:
-                    self._q.append(int(n)) # add the connected nodes to the queue
-                    self._added[n] = id    # indicate that this node is already in the queue
-                                     # and store its parent
-        # when q not empty
-        if self._q:
-            self._BFS_helper(int(self._q.popleft()))
 
-
-    # TODO: combine these functions (they're the same except q and stack are diff names)
-    # maybe make a helper function?
-    def _DFS_helper(self, id):
-        found = False
-        if id in self._nodes:
-            for n in reversed(self._nodes[int(id)]):
-                # check that the neighbors haven't been already added
-                if n not in self._added:
-                    # TODO: consider using set instead of dictionary (for added)
-                    self._added[n] = 1          # indicate that this node is already in the queue
-                    self._stack.append(int(n))  # add the connected nodes to the queue
-                    self._parent[n] = id # update parent
-                    if n == end_node:
-                        found = True
-                        break
-
-        if self._stack and not found:                         # stack not empty
-            self._DFS_helper(int(self._stack.pop()))
-
-
-    # doesn't need a helper function because it's not recursive
     def UCS(self, start_node, end_node):
         pq = pqdict({start_node: 0})             # priority queue
         visited = {}
