@@ -3,21 +3,16 @@ import sys
 from collections import deque
 import queue
 sys.path.append("/pqdict") # only way to include the library on Mimir
-from pqdict import pqdict # http://pqdict.readthedocs.io/en/latest/pqdict.html#pqdict-class
+from pqdict import pqdict  # http://pqdict.readthedocs.io/en/latest/pqdict.html#pqdict-class
 
 
 # class for searching a directed graph
 class GraphSearch:
+
     # constructor
     def __init__(self, input_file):
         self._nodes = {}    # dictionary storing the neighbors each node can access
-        self._added = set() # (dictionary) of already discovered nodes
-        self._parent = {}   # remember the parent of each traversed node
-
         self._weights = {}  # dictionary of the weights of the edges between connected nodes
-        self._q = deque([]) # FIFO queue
-        self._stack = []    # list used as a stack
-
         self._readFile(input_file)
 
 
@@ -45,50 +40,51 @@ class GraphSearch:
 
     # TODO: reset everything after doing a graph search and printing results
     def BFS(self, start_node, end_node):
-        self._q.append(start_node)
-        self._parent[start_node] = None
-        self._added.add(start_node)
+        q = deque([start_node])           # FIFO queue
+        self._parent = {start_node: None} # dictionary storing the parent (ID) of each traversed node
+        discovered = {start_node}         # set of already discovered nodes
 
-        while self._q:
-            id = int(self._q.popleft())
+        # while queue not empty
+        while q:
+            id = int(q.popleft())
             if id in self._nodes:
                 for n in self._nodes[int(id)]:
-                    # check that the neighbors haven't been already added
-                    if n not in self._added:
-                        self._added.add(n)     # indicate that this node is already in the queue
-                        self._q.append(int(n)) # add the connected nodes to the queue
-                        self._parent[n] = id   # update parent
-        self._printResults(end_node)           # print results
+                    # check that the neighbors haven't been already discovered
+                    if n not in discovered:
+                        q.append(int(n))               # add the connected node to the queue
+                        self._parent[n] = id           # update parent
+                        discovered.add(n)              # indicate this node has been added to the queue
+        self._printResults(end_node)                   # print results
 
 
     def DFS(self, start_node, end_node):
-        self._parent = {start_node: None}
-        self._stack.append(start_node)
-        self._added.add(start_node)
+        stack = [start_node]              # list used as a stack
+        self._parent = {start_node: None} # dictionary storing the parent (ID) of each traversed node
+        discovered = {start_node}         # set of already discovered nodes
 
         # while stack not empty
-        while self._stack:
-            id = int(self._stack.pop())
-
+        while stack:
+            id = int(stack.pop())
             if id in self._nodes:
+                # have to iterate over neighbors in reverse order (to pass project tests)
                 for n in reversed(self._nodes[int(id)]):
-                    # check that the neighbors haven't been already added
-                    if n not in self._added:
-                        self._added.add(n)             # indicate that this node is already in the queue
-                        self._stack.append(int(n))     # add the connected nodes to the queue
+                    # check that the neighbors haven't been already discovered
+                    if n not in discovered:
+                        stack.append(int(n))           # add the connected node to the queue
                         self._parent[n] = id           # update parent
+                        discovered.add(n)              # indicate this node has been added to the queue
         self._printResults(end_node)
 
 
     def UCS(self, start_node, end_node):
-        pq = pqdict({start_node: 0})                   # priority queue
-        visited = {}
-        self._parent = {start_node: None}
+        visited = set()                   # set of nodes that have already been popped from the queue
+        pq = pqdict({start_node: 0})      # priority queue
+        self._parent = {start_node: None} # dictionary storing the parent (ID) of each traversed node
 
         while True:
             try:
-                cur_cost = pq[pq.top()]
-                cur = int(pq.pop())                    # ID of the node we're currently visiting
+                cur_cost = pq[pq.top()]                # cost of reaching this node
+                cur = int(pq.pop())                    # ID of the current node
 
                 for n in self._nodes[cur]:             # neighbors of current node
                     if n not in visited:
@@ -103,8 +99,7 @@ class GraphSearch:
                         else:
                             pq[n] = n_cost             # add to priority queue
                             self._parent[n] = cur      # remember how we reached n
-
-                visited[cur] = None
+                visited.add(cur)                       # remember that this node was visited
                 if cur == end_node:
                     break
 
@@ -142,36 +137,26 @@ class GraphSearch:
 
 
     # add an edge to the graph pointing from src node to dest node
+    # (this is a directed graph, not bidirectional)
     def _writeEdge(self, src, dest):
         if src not in self._nodes:
             self._nodes[src] = []
         self._nodes[src].append(dest)
 
-        # this is a directional graph, not bidirectional!
-        #if dest not in nodes:
-        #    nodes[dest] = []
-        #nodes[dest].append(src)
 
-
-# global variables
+# command-line arguments
 input_file = sys.argv[1]
 start_node = int(sys.argv[2])
 end_node = int(sys.argv[3])
-search_type = sys.argv[4] # 'BFS' or 'DFS', or 'UCS'
-
+search_type = sys.argv[4]    # 'BFS' or 'DFS', or 'UCS'
 
 graph = GraphSearch(input_file)
 
+# search the graph for a path from the start node to the end node
+# using the given search type
 if search_type == "BFS":
     graph.BFS(start_node, end_node)
-
 if search_type == "DFS":
-    #parent = {start_node: None}
-
-    #stack.append(start_node)
-    #added[start_node] = 1
-    #DFS(int(stack.pop()))
     graph.DFS(start_node, end_node)
-
 if search_type == "UCS":
     graph.UCS(start_node, end_node)
