@@ -30,7 +30,7 @@ class GraphSearch:
 
             # store the weight of this edge
             self._weights[self._edgeName(source, dest)] = weight
-            self._writeEdge(source, dest) # remember that these nodes are connected
+            self._addEdge(source, dest) # remember that these nodes are connected
         f.close()
 
         # sort node neighbors by increasing ID
@@ -38,10 +38,10 @@ class GraphSearch:
             self._nodes[n] = sorted(self._nodes[n])
 
 
-    # TODO: reset everything after doing a graph search and printing results
+    # perform breadth first search on the graph
     def BFS(self, start_node, end_node):
         q = deque([start_node])           # FIFO queue
-        self._parent = {start_node: None} # dictionary storing the parent (ID) of each traversed node
+        parent = {start_node: None}       # dictionary storing the parent (ID) of each traversed node
         discovered = {start_node}         # set of already discovered nodes
 
         # while queue not empty
@@ -52,14 +52,15 @@ class GraphSearch:
                     # check that the neighbors haven't been already discovered
                     if n not in discovered:
                         q.append(int(n))               # add the connected node to the queue
-                        self._parent[n] = id           # update parent
+                        parent[n] = id                 # update parent
                         discovered.add(n)              # indicate this node has been added to the queue
-        self._printResults(end_node)                   # print results
+        self._printResults(parent, end_node)           # print results
 
 
+    # perform depth first search on the graph
     def DFS(self, start_node, end_node):
         stack = [start_node]              # list used as a stack
-        self._parent = {start_node: None} # dictionary storing the parent (ID) of each traversed node
+        parent = {start_node: None}       # dictionary storing the parent (ID) of each traversed node
         discovered = {start_node}         # set of already discovered nodes
 
         # while stack not empty
@@ -71,15 +72,16 @@ class GraphSearch:
                     # check that the neighbors haven't been already discovered
                     if n not in discovered:
                         stack.append(int(n))           # add the connected node to the queue
-                        self._parent[n] = id           # update parent
+                        parent[n] = id                 # update parent
                         discovered.add(n)              # indicate this node has been added to the queue
-        self._printResults(end_node)
+        self._printResults(parent, end_node)
 
 
+    # perform uniform cost search on the graph
     def UCS(self, start_node, end_node):
         visited = set()                   # set of nodes that have already been popped from the queue
         pq = pqdict({start_node: 0})      # priority queue
-        self._parent = {start_node: None} # dictionary storing the parent (ID) of each traversed node
+        parent = {start_node: None}       # dictionary storing the parent (ID) of each traversed node
 
         while True:
             try:
@@ -95,10 +97,10 @@ class GraphSearch:
                             if n_cost < pq[n]:
                                 # cheaper route to node discovered
                                 pq[n] = n_cost         # update priority
-                                self._parent[n] = cur  # update parent
+                                parent[n] = cur        # update parent
                         else:
                             pq[n] = n_cost             # add to priority queue
-                            self._parent[n] = cur      # remember how we reached n
+                            parent[n] = cur            # remember how we reached n
                 visited.add(cur)                       # remember that this node was visited
                 if cur == end_node:
                     break
@@ -106,18 +108,18 @@ class GraphSearch:
             except KeyError:
                 # priority queue is empty
                 break
-        self._printResults(end_node)
+        self._printResults(parent, end_node)
 
 
     # prints the final results as an array of node IDs
-    def _printResults(self, end_node):
-        res = []          # array of the order to visit the nodes
+    def _printResults(self, parent, end_node):
+        res = [] # list of the nodes to traverse on the path to the end node
         temp = end_node
 
-        if end_node in self._parent:
+        if end_node in parent:
             while temp != None:
                 res = [temp] + res
-                temp = self._parent[temp]
+                temp = parent[temp]
         print(res)
 
 
@@ -138,7 +140,7 @@ class GraphSearch:
 
     # add an edge to the graph pointing from src node to dest node
     # (this is a directed graph, not bidirectional)
-    def _writeEdge(self, src, dest):
+    def _addEdge(self, src, dest):
         if src not in self._nodes:
             self._nodes[src] = []
         self._nodes[src].append(dest)
