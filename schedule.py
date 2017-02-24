@@ -72,13 +72,67 @@ class Schedule:
 
         return str(out)
 
+    # A schedule is considered bad if it contains a day where the same employee
+    # works more than once. This heuristic should count the number of same-day
+    # pairs of shifts that are not the same, and return that number. Return the
+    # value as an integer.
     def value(self):
-        raise NotImplementedError("First heuristic is not implemented.")
+        count = 1;
 
+        # count the number of same-day pairs of shifts that are not the same
+        for d in range(self.num_days):
+            day = self.schedule[d]
+            if day.morning != day.evening:
+                count = count + 1
+            if day.morning != day.graveyard:
+                count = count + 1
+            if day.evening != day.graveyard:
+                count = count + 1
+        return count
+
+    # A schedule is considered bad if there are (1) employees who work on the
+    # same day, (2) even numbered employees working on the same day as odd
+    # numbered employees. Reuse what you did in value1, but this time count the
+    # number of days WITHOUT an even/odd employees mix as well. Return the
+    # value you calculate as an integer.
     def value2(self):
-        raise NotImplementedError("Second heuristic is not implemented.")
+        count = value()
 
+        for d in range(self.num_days):
+            day = self.schedule[d]
+            # if no even/odd employee mix
+            if day.morning % 2 == day.evening % 2 and day.evening % 2 == day.graveyard % 2:
+                count = count + 1
+        return count
+
+    # A schedule is considered bad if there are (1) employees who work on the
+    # same day, (2) even numbered employees working on the same day as odd
+    # numbered employees, (3) employees who work a graveyard shift followed by
+    # a morning shift, (4) a schedule isn't balanced, meaning that employes are
+    # scheduled evenly over the number of days if you have five employees over
+    # 10 days every employee would be scheduled six times for that schedule to
+    # be balanced. Count the number numer of employees who are evenly
+    # scheduled. Return the sum of each of these values you calculate as an
+    # integer.
     def value3(self):
-        raise NotImplementedError("Third heuristic is not implemented.")
+        count = value2()
+        shifts = [0] * self.num_workers # store each employee's number of shifts in this schedule
+
+        for d in range(self.num_days):
+            day = self.schedule[d]
+            shifts[day.morning] = shifts[day.morning] + 1
+            shifts[day.evening] = shifts[day.evening] + 1
+            shifts[day.graveyard] = shifts[day.graveyard] + 1
+
+            # if an employee doesn't have a back to back graveyard and morning shift
+            if (d+1) < self.num_days: # if next index is valid
+                if day.graveyard != self.schedule[d+1].morning:
+                    count = count + 1
+
+        balanced = self.num_days * 3 / self.num_workers # num shifts per employee in a balanced schedule
+        for e in shifts:
+            if e == balanced:
+                count = count + 1
+        return count
     
     #add any other methods you need here
