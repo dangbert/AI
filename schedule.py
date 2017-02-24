@@ -3,8 +3,13 @@
 #Description: represents a schedule of employees
 
 from random import choice
-from prettytable import PrettyTable
 from day import Day 
+import sys
+
+try:
+    from prettytable import PrettyTable
+except:
+    pass
 
 #represents a sequence of days as one cohesive schedule
 class Schedule:
@@ -21,20 +26,25 @@ class Schedule:
             day = Day(-1, -1, -1)
             self.schedule.append(day)
 
+    def toFile(self, filename):
+        with open(filename,"w") as f:
+            for day in self.schedule:
+                f.write(str(day) + "\n")
+
     #load schedule from file
     #this is mostly for testing
     def load(self, filename):
         with open(filename) as f:
             lines = f.readlines()
+            self.num_workers = int(lines[0].strip())
+            self.num_days = int(lines[1].strip())
+            self.schedule = [None]*self.num_days
 
-            self.num_days = len(lines)
-            self.num_workers = 0
 
-            for n,d in enumerate(lines):
-                m,e,g = map(int, d.split())
-                self.schedule[n].set("morning",m)
-                self.schedule[n].set("evening",e)
-                self.schedule[n].set("graveyard",g)
+            for n,d in enumerate(lines[2:]):
+                m,e,g = map(int, d.split(","))
+                day = Day(m,e,g)
+                self.schedule[n] = day
                 self.num_workers = max([m,e,g,self.num_workers])
                 
             self.num_workers += 1
@@ -64,11 +74,17 @@ class Schedule:
     
     #string representation of this schedule
     def __str__(self):
-        out = PrettyTable()
-        out.add_column("", ["Morning","Evening","Graveyard"])
 
-        for n, day in enumerate(self.schedule):
-            out.add_column("Day: " + str(n), str(day).split(","))
+        if 'prettytable' not in sys.modules:
+            out = ''
+            for n,day in enumerate(self.schedule):
+                out += str(n)+ ": " + str(day) + "\n"
+        else:
+            out = PrettyTable()
+            out.add_column("", ["Morning","Evening","Graveyard"])
+
+            for n, day in enumerate(self.schedule):
+                out.add_column("Day: " + str(n), str(day).split(","))
 
         return str(out)
 
@@ -76,7 +92,7 @@ class Schedule:
     # works more than once. This heuristic should count the number of same-day
     # pairs of shifts that are not the same, and return that number. Return the
     # value as an integer.
-    def value(self):
+    def value1(self):
         count = 1;
 
         # count the number of same-day pairs of shifts that are not the same
@@ -96,7 +112,7 @@ class Schedule:
     # number of days WITHOUT an even/odd employees mix as well. Return the
     # value you calculate as an integer.
     def value2(self):
-        count = value()
+        count = self.value1()
 
         for d in range(self.num_days):
             day = self.schedule[d]
@@ -115,7 +131,7 @@ class Schedule:
     # scheduled. Return the sum of each of these values you calculate as an
     # integer.
     def value3(self):
-        count = value2()
+        count = self.value2()
         shifts = [0] * self.num_workers # store each employee's number of shifts in this schedule
 
         for d in range(self.num_days):
