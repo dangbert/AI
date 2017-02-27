@@ -93,7 +93,7 @@ class Schedule:
     # pairs of shifts that are not the same, and return that number. Return the
     # value as an integer.
     def value1(self):
-        count = 1;
+        count = 0;
 
         # count the number of same-day pairs of shifts that are not the same
         for d in range(self.num_days):
@@ -134,6 +134,7 @@ class Schedule:
         count = self.value2()
         shifts = [0] * self.num_workers # store each employee's number of shifts in this schedule
 
+        print(shifts)
         for d in range(self.num_days):
             day = self.schedule[d]
             shifts[day.morning] = shifts[day.morning] + 1
@@ -145,10 +146,23 @@ class Schedule:
                 if day.graveyard != self.schedule[d+1].morning:
                     count = count + 1
 
-        balanced = self.num_days * 3 / self.num_workers # num shifts per employee in a balanced schedule
-        for e in shifts:
-            if e == balanced:
-                count = count + 1
+        print(shifts)
+        print("\nat balanced part")
+        res = int(self.num_days * 3 / self.num_workers)    # result
+        rem = self.num_days * 3 % self.num_workers         # remainder
+        balanced = {}
+        balanced[res] = self.num_workers - rem
+        if rem != 0:
+            balanced[res+1] = rem
+
+        print(balanced)
+        for num in shifts:
+            print("at " + str(num))
+            if num in balanced and balanced[num] != 0:
+                count + count + 1
+                balanced[num] = balanced[num] - 1
+                print(balanced)
+
         return count
     
     #add any other methods you need here

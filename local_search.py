@@ -11,8 +11,11 @@ from schedule import Schedule
 # are using.
 
 def main():
-    #do the thing
-    pass
+    # temporary testing of value3 function
+    s = Schedule(11, 20)
+    s.randomize()
+    val = s.value3()
+    print("value3 = " + str(val))
 
 if __name__ == "__main__":
     main()
