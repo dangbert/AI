@@ -47,7 +47,6 @@ class Schedule:
                 self.schedule[n] = day
                 self.num_workers = max([m,e,g,self.num_workers])
                 
-            self.num_workers += 1
             self.workers = list(range(self.num_workers))
 
     #randomizes the current schedule
@@ -62,11 +61,11 @@ class Schedule:
     #set schedule on day for a shift to be a specific employee
     def set(self, day, shift, worker):
 
-        if type(worker) != 'int' or worker < 0 or worker >= self.num_workers:
+        if type(worker) != int or worker < 0 or worker >= self.num_workers:
             msg = "{} is not a valid worker number for this schedule.".format(worker)
             raise ValueError(msg)
 
-        if type(day) != 'int' or day < 0 or day >= self.num_days:
+        if type(day) != int or day < 0 or day >= self.num_days:
             msg = "{} is not a valid day for this schedule.".format(day)
             raise ValueError(msg)
 
