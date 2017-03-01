@@ -15,11 +15,19 @@ from copy import deepcopy
 
 def main():
     # temporary testing of value3 function
-    s = Schedule(37, 200)
+    s = Schedule(6, 40)
+    for day in s.schedule:
+        day.morning = randint(0, s.num_workers)
+        day.evening = randint(0, s.num_workers)
+        day.graveyard = randint(0, s.num_workers)
+
+    print(s.schedule)
+
     s.randomize()
     #val = s.value3()
     #print("value3 = " + str(val))
-    localSearch(s, 2)
+    hillClimb(s, 2)
+    print(s.schedule)
 
 
 # A state in this problem is just one instance of a schedule, and you can
@@ -29,10 +37,10 @@ def main():
 # results in a better schedule according to the heuristic you are using
 # @param sched: schedule object
 # @param heur: int (1, 2, or 3) refering to which heurstic to use in Schedule class
-def localSearch(sched, heur):
-    print("---------Local Search " + str(heur) + "----------")
+def hillClimb(sched, heur):
+    print("---------Local Search (" + str(heur) + ")----------")
 
-    for i in range(50):
+    for i in range(125):
         # pick a random shift in the schedule and see if it improves it
         cur = h(sched, heur)
         val = cur
@@ -43,7 +51,7 @@ def localSearch(sched, heur):
         # count is there just in case we can find anything better
         while val <= cur and count < 100:
             count = count + 1
-            d = randint(0, sched.num_workers)
+            d = randint(0, sched.num_days-1)
             day = sched.schedule[d] # note: changing this object will change the schedule class
             oldDay = deepcopy(day)  # deep copy so orginal state will be preserved
 
