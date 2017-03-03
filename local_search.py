@@ -16,16 +16,13 @@ from copy import deepcopy
 def main():
     # temporary testing of value3 function
     s = Schedule(6, 40)
-    for day in s.schedule:
-        day.morning = randint(0, s.num_workers)
-        day.evening = randint(0, s.num_workers)
-        day.graveyard = randint(0, s.num_workers)
+    s.randomize()
+    #for day in s.schedule:
+    #    day.morning = randint(0, s.num_workers)
+    #    day.evening = randint(0, s.num_workers)
+    #    day.graveyard = randint(0, s.num_workers)
 
     print(s.schedule)
-
-    s.randomize()
-    #val = s.value3()
-    #print("value3 = " + str(val))
     hillClimb(s, 2)
     print(s.schedule)
 

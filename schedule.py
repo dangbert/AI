@@ -95,8 +95,7 @@ class Schedule:
         count = 0;
 
         # count the number of same-day pairs of shifts that are not the same
-        for d in range(self.num_days):
-            day = self.schedule[d]
+        for day in self.schedule:
             if day.morning != day.evening:
                 count = count + 1
             if day.morning != day.graveyard:
@@ -113,8 +112,7 @@ class Schedule:
     def value2(self):
         count = self.value1()
 
-        for d in range(self.num_days):
-            day = self.schedule[d]
+        for day in self.schedule:
             # if no even/odd employee mix
             if day.morning % 2 == day.evening % 2 and day.evening % 2 == day.graveyard % 2:
                 count = count + 1
@@ -131,37 +129,25 @@ class Schedule:
     # integer.
     def value3(self):
         count = self.value2()
-        shifts = [0] * self.num_workers # store each employee's number of shifts in this schedule
 
-        print(shifts)
-        for d in range(self.num_days):
-            day = self.schedule[d]
+        # store each employee's number of shifts in the schedule
+        shifts = [0] * self.num_workers
+        for n in range(self.num_days):
+            day = self.schedule[n]
             shifts[day.morning] = shifts[day.morning] + 1
             shifts[day.evening] = shifts[day.evening] + 1
             shifts[day.graveyard] = shifts[day.graveyard] + 1
 
             # if an employee doesn't have a back to back graveyard and morning shift
-            if (d+1) < self.num_days: # if next index is valid
-                if day.graveyard != self.schedule[d+1].morning:
+            if (n+1) < self.num_days: # if next index is valid
+                if day.graveyard != self.schedule[n+1].morning:
                     count = count + 1
 
-        print(shifts)
-        print("\nat balanced part")
-        res = int(self.num_days * 3 / self.num_workers)    # result
-        rem = self.num_days * 3 % self.num_workers         # remainder
-        balanced = {}
-        balanced[res] = self.num_workers - rem
-        if rem != 0:
-            balanced[res+1] = rem
-
-        print(balanced)
+        # number of shifts needed for employee to be balanced
+        balanced = int(self.num_days * 3 / self.num_workers)
         for num in shifts:
-            print("at " + str(num))
-            if num in balanced and balanced[num] != 0:
-                count + count + 1
-                balanced[num] = balanced[num] - 1
-                print(balanced)
-
+            if num == balanced:
+                count = count + 1
         return count
     
     #add any other methods you need here
