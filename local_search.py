@@ -15,7 +15,9 @@ import sys
 from schedule import Schedule
 from random import choice
 from random import randint
+from random import random
 from copy import deepcopy
+from math import exp
 
 # implement the hill climbing search algorithm for these schedules. Try each
 # different heuristic to see how better schedules are made with better
@@ -57,6 +59,7 @@ def main():
     if arg1 == "--anneal":
         hill = False
 
+    # TODO: consider generating random parameters for the schedule
     s = Schedule(7, 31)
     s.randomize()
     #for day in s.schedule:
@@ -68,8 +71,7 @@ def main():
     if hill:
         hillClimb(s, num)
     else:
-        # call anneal function
-        pass
+        simAnneal(s, num)
     print(s.schedule) # print the new schedule
 
 
@@ -83,7 +85,7 @@ def main():
 def hillClimb(sched, heur):
     print("---------Local Search (" + str(heur) + ")----------")
 
-    while 1:
+    while True:
         cur = h(sched, heur) # current heuristic value
         val = cur            # new heuristic value to potentially move to
         print("cur value: " + str(cur))
@@ -122,12 +124,72 @@ def hillClimb(sched, heur):
 # like hill climbing but theres a chance of staying at the current postion even
 # if its worse
 # keep track of the global best
-# create prob function e^(-(B-A)/T) ?
-# A is the value of state we're at, is the state we're considering going to
 # t decreases every time you change state
 
 #p = 0.25
 #if random.random() < p)
+def simAnneal(sched, heur):
+    print("---------Simulated Annealing (" + str(heur) + ")----------")
+    best = sched   # best schedule so far
+
+    p = prob(23, 30, 5)
+    print("prob = " + str(p))
+    # temperatue starts at 100 and stops at 0
+    t = 1.0
+    while t > 0.001:
+        # TODO: consider doing multiple iterations at each temperature
+        cur = h(sched, heur)
+        print("cur value: " + str(cur))
+        # perform a random shift in the schedule and consider moving there
+        d = randint(0, sched.num_days-1)
+        day = sched.schedule[d] # note: changing this object will change the schedule class
+        oldDay = deepcopy(day)  # deep copy so orginal state will be preserved
+
+        shift = randint(1,3)
+        if shift == 1:
+            day.morning = choice(sched.workers)
+        if shift == 2:
+            day.evening = choice(sched.workers)
+        if shift == 3:
+            day.graveyard = choice(sched.workers)
+
+        val = h(sched, heur)
+
+        if val > cur:
+            # move to better state
+            pass
+
+            # maybe move to other state
+        else:
+            r = random()
+            p = prob(cur, val, t)  # acceptance probability
+            print("prob = " + str(p), "\trandom = " + str(r))
+
+
+            # undo changes
+            sched.schedule[d] = oldDay
+
+        t = 0.95 * t           # decrease t
+    print("final huerstic value: " + str(cur))
+
+
+
+# get a random neighbor state of a schedule
+# makes a deep copy of the provided schedule
+# TODO: implement this
+def getNeighbor(sched):
+    pass
+
+# acceptance probability function
+# cur is the heuristic value of the state we're at
+# other is the heuristic value of the state we're considering going to
+# t is the current temperature
+def prob(cur, other, t):
+    print("cur = " + str(cur) + "\tother = " + str(other) + "\tt = " + str(t))
+    top = float(-(other - cur) / t)
+    print("top = " + str(top))
+    return exp(top)
+
 
 # call the appropriate heuristic function and return the value
 def h(sched, heur):
