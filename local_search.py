@@ -1,4 +1,17 @@
 #!/usr/bin/env python3
+# Dan Engbert
+# CMSC 471 - Spring 2017
+
+
+# HOW TO RUN PROGRAM:
+# run hill climbing algorithm with value3:
+# python3 local_search.py --hill 3
+#
+# run simulated annealing algorithm with value1:
+# python3 local_search.py --anneal 1
+
+
+import sys
 from schedule import Schedule
 from random import choice
 from random import randint
@@ -14,8 +27,37 @@ from copy import deepcopy
 # are using.
 
 def main():
-    # temporary testing of value3 function
-    s = Schedule(6, 40)
+    # check command line args
+    if len(sys.argv) != 3:
+        print("Error: 2 program arguments are required")
+        print("       e.g. --hill 3")
+        print("       or   --anneal 1")
+        return
+    arg1 = sys.argv[1]
+    arg2 = sys.argv[2]
+    try:
+        arg2 = int(arg2)
+    except:
+        tmp = arg1
+        arg1 = arg2
+        arg2 = tmp
+        try:
+            arg2 = int(arg2)
+        except:
+            arg2 = int(0)
+    num = arg2
+    if not (num == 1 or num == 2 or num == 3):
+        print("Error: valid integer argument required (1, 2, or 3)")
+        return
+    if not (arg1 == "--anneal" or arg1 == "--hill"):
+        print("Error: invalid search type argument")
+        print("       use --anneal or --hill")
+        return
+    hill = True
+    if arg1 == "--anneal":
+        hill = False
+
+    s = Schedule(7, 31)
     s.randomize()
     #for day in s.schedule:
     #    day.morning = randint(0, s.num_workers)
@@ -23,8 +65,12 @@ def main():
     #    day.graveyard = randint(0, s.num_workers)
 
     print(s.schedule)
-    hillClimb(s, 2)
-    print(s.schedule)
+    if hill:
+        hillClimb(s, num)
+    else:
+        # call anneal function
+        pass
+    print(s.schedule) # print the new schedule
 
 
 # A state in this problem is just one instance of a schedule, and you can
@@ -37,17 +83,17 @@ def main():
 def hillClimb(sched, heur):
     print("---------Local Search (" + str(heur) + ")----------")
 
-    for i in range(125):
-        # pick a random shift in the schedule and see if it improves it
-        cur = h(sched, heur)
-        val = cur
+    while 1:
+        cur = h(sched, heur) # current heuristic value
+        val = cur            # new heuristic value to potentially move to
         print("cur value: " + str(cur))
         count = 0
 
-        # find a change that increases the heuristic
-        # count is there just in case we can find anything better
-        while val <= cur and count < 100:
+        # find a change that increases the heuristic and move to that state
+        while val <= cur and count <= 1000:
             count = count + 1
+
+            # perform a random shift in the schedule and see if it improves it
             d = randint(0, sched.num_days-1)
             day = sched.schedule[d] # note: changing this object will change the schedule class
             oldDay = deepcopy(day)  # deep copy so orginal state will be preserved
@@ -61,13 +107,27 @@ def hillClimb(sched, heur):
                 day.graveyard = choice(sched.workers)
 
             val = h(sched, heur)
-            # consider not undoing if the value is the same
-            if val <= cur: # undo changes
+            if val <= cur:
+                # undo changes
                 sched.schedule[d] = oldDay
 
-    print("final cur value: " + str(cur))
+        # alogrithm finishes when no better nearby state is found (after 1000 attempts)
+        if count > 1000:
+            break
+    print("hill climb complete!")
+    print("final huerstic value: " + str(cur))
 
 
+# simulated annealing
+# like hill climbing but theres a chance of staying at the current postion even
+# if its worse
+# keep track of the global best
+# create prob function e^(-(B-A)/T) ?
+# A is the value of state we're at, is the state we're considering going to
+# t decreases every time you change state
+
+#p = 0.25
+#if random.random() < p)
 
 # call the appropriate heuristic function and return the value
 def h(sched, heur):
