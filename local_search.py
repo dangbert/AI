@@ -130,11 +130,10 @@ def hillClimb(sched, heur):
 #if random.random() < p)
 def simAnneal(sched, heur):
     print("---------Simulated Annealing (" + str(heur) + ")----------")
-    best = sched   # best schedule so far
+    best = deepcopy(sched)   # best schedule so far
+    cur = h(sched, heur)
 
-    p = prob(23, 30, 5)
-    print("prob = " + str(p))
-    # temperatue starts at 100 and stops at 0
+    # temperatue starts at 1.0 and stops at 0.001
     t = 1.0
     while t > 0.001:
         # TODO: consider doing multiple iterations at each temperature
@@ -157,8 +156,7 @@ def simAnneal(sched, heur):
 
         if val > cur:
             # move to better state
-            # TODO: keep track of best so far
-            pass
+            best = deepcopy(sched)
 
             # maybe move to other state
         else:
@@ -171,6 +169,8 @@ def simAnneal(sched, heur):
 
         t = 0.95 * t           # decrease t
     print("final huerstic value: " + str(cur))
+    print("all time best huerstic value: " + str(h(best, heur)))
+    sched = best
 
 
 
