@@ -13,21 +13,15 @@
 
 import sys
 from schedule import Schedule
+from copy import deepcopy
+from math import exp
 from random import choice
 from random import randint
 from random import random
-from copy import deepcopy
-from math import exp
 
-# implement the hill climbing search algorithm for these schedules. Try each
-# different heuristic to see how better schedules are made with better
-# heursitics. A state in this problem is just one instance of a schedule, and
-# you can change the state by changing who works what shift on what day. I
-# recommend changing a state one shift at a time to see the algorithm work
-# well. For hill climbing to work you want to figure out what change to the
-# current schedule results in a better schedule according to the heuristic you
-# are using.
 
+# generates a random schedule and optimizes it with either the hill climbing
+# algorithm or through simulated annealing (depending on command line args)
 def main():
     # check command line args
     if len(sys.argv) != 3:
@@ -59,10 +53,9 @@ def main():
     if arg1 == "--anneal":
         hill = False
 
-    #generate random parameters for the schedule
+    # generate random parameters for generating a schedule
     numDays = randint(10, 50)
     numEmployees = randint(4, int(numDays * 0.7))
-
     print("Created schedule with " + str(numDays) + " days and " + str(numEmployees) + " employees.")
 
     s = Schedule(numEmployees, numDays)
@@ -75,11 +68,12 @@ def main():
     else:
         simAnneal(s, num)
     print("optimized schedule:")
-    print(s.schedule) # print the new schedule
+    print(s.schedule)                # print the new schedule
 
 
-# performs hill climbing to find a more optimal schedule
+# perform hill climbing to optimize a schedule
 # changes a schedule one shift at a time
+# a state is changed by changing who works what shift on what day
 # (a state is just one instance of a schedule)
 # @param sched: schedule object
 # @param heur: int (1, 2, or 3) refering to which heurstic to use
@@ -89,8 +83,8 @@ def hillClimb(sched, heur):
     print("initial heuristic value: " + str(cur))
 
     while True:
-        cur = h(sched, heur) # current heuristic value
-        val = cur            # new heuristic value to potentially move to
+        cur = h(sched, heur)         # current heuristic value
+        val = cur                    # new heuristic value to potentially move to
         print("  cur value: " + str(cur))
         count = 0
 
@@ -100,8 +94,8 @@ def hillClimb(sched, heur):
 
             # perform a random shift in the schedule and see if it improves it
             d = randint(0, sched.num_days-1)
-            day = sched.schedule[d] # note: changing this object will change the schedule class
-            oldDay = deepcopy(day)  # deep copy so orginal state will be preserved
+            day = sched.schedule[d]  # note: changing this object will change the schedule class
+            oldDay = deepcopy(day)   # deep copy so orginal state will be preserved
 
             shift = randint(1,3)
             if shift == 1:
@@ -122,7 +116,7 @@ def hillClimb(sched, heur):
     print("final huerstic value: " + str(cur) + "\n")
 
 
-# performs simulated annealing to find a more optimal schedule
+# perform simulated annealing to optimize a schedule
 # also keeps track of the all time best schedule
 # @param sched: schedule object
 # @param heur: int (1, 2, or 3) refering to which heurstic to use
@@ -135,6 +129,7 @@ def simAnneal(sched, heur):
 
     # temperatue starts at 1.0 and stops at 0.001
     t = 1.0
+    k = 0.995
     while t > 0.001:
         old = cur
         cur = h(sched, heur)
@@ -167,9 +162,7 @@ def simAnneal(sched, heur):
             if not (r <= p):
                 # undo changes
                 sched.schedule[d] = oldDay
-
-        t = 0.99 * t                # decrease t
-
+        t = k * t                    # decrease t
     print("final huerstic value: " + str(cur))
     print("all time best huerstic value: " + str(h(best, heur)) + "\n")
     sched = best
