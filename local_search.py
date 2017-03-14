@@ -139,7 +139,7 @@ def simAnneal(sched, heur):
     while t > 0.001:
         # TODO: consider doing multiple iterations at each temperature
         cur = h(sched, heur)
-        print("cur value: " + str(cur))
+        print("\ncur value: " + str(cur))
         # perform a random shift in the schedule and consider moving there
         d = randint(0, sched.num_days-1)
         day = sched.schedule[d] # note: changing this object will change the schedule class
@@ -157,17 +157,17 @@ def simAnneal(sched, heur):
 
         if val > cur:
             # move to better state
+            # TODO: keep track of best so far
             pass
 
             # maybe move to other state
         else:
             r = random()
             p = prob(cur, val, t)  # acceptance probability
-            print("prob = " + str(p), "\trandom = " + str(r))
-
-
-            # undo changes
-            sched.schedule[d] = oldDay
+            #print("   prob = " + str(p), "\trandom = " + str(r))
+            if not (r <= p):
+                # undo changes
+                sched.schedule[d] = oldDay
 
         t = 0.95 * t           # decrease t
     print("final huerstic value: " + str(cur))
@@ -185,10 +185,14 @@ def getNeighbor(sched):
 # other is the heuristic value of the state we're considering going to
 # t is the current temperature
 def prob(cur, other, t):
-    print("cur = " + str(cur) + "\tother = " + str(other) + "\tt = " + str(t))
-    top = float(-(other - cur) / t)
-    print("top = " + str(top))
-    return exp(top)
+    #print("\n\n")
+    #print("cur = " + str(cur) + "\tother = " + str(other) + "\tt = " + str(t))
+    top = float((other - cur) / t)
+    #print("top = " + str(top))
+    res = exp(top)
+    if res > 1.0:
+        res = 1.0
+    return res
 
 
 # call the appropriate heuristic function and return the value
