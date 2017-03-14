@@ -59,19 +59,22 @@ def main():
     if arg1 == "--anneal":
         hill = False
 
-    # TODO: consider generating random parameters for the schedule
-    s = Schedule(7, 31)
-    s.randomize()
-    #for day in s.schedule:
-    #    day.morning = randint(0, s.num_workers)
-    #    day.evening = randint(0, s.num_workers)
-    #    day.graveyard = randint(0, s.num_workers)
+    #generate random parameters for the schedule
+    numDays = randint(10, 50)
+    numEmployees = randint(4, int(numDays * 0.7))
 
+    print("Created schedule with " + str(numDays) + " days and " + str(numEmployees) + " employees.")
+
+    s = Schedule(numEmployees, numDays)
+    s.randomize()
+
+    print("initial schedule:")
     print(s.schedule)
     if hill:
         hillClimb(s, num)
     else:
         simAnneal(s, num)
+    print("optimized schedule:")
     print(s.schedule) # print the new schedule
 
 
@@ -83,12 +86,14 @@ def main():
 # @param sched: schedule object
 # @param heur: int (1, 2, or 3) refering to which heurstic to use in Schedule class
 def hillClimb(sched, heur):
-    print("---------Local Search (" + str(heur) + ")----------")
+    print("\n---------Local Search (" + str(heur) + ")----------")
+    cur = h(sched, heur)
+    print("initial heuristic value " + str(cur))
 
     while True:
         cur = h(sched, heur) # current heuristic value
         val = cur            # new heuristic value to potentially move to
-        print("cur value: " + str(cur))
+        #print("cur value: " + str(cur))
         count = 0
 
         # find a change that increases the heuristic and move to that state
@@ -117,7 +122,7 @@ def hillClimb(sched, heur):
         if count > 1000:
             break
     print("hill climb complete!")
-    print("final huerstic value: " + str(cur))
+    print("final huerstic value: " + str(cur) + "\n")
 
 
 # simulated annealing
@@ -129,16 +134,17 @@ def hillClimb(sched, heur):
 #p = 0.25
 #if random.random() < p)
 def simAnneal(sched, heur):
-    print("---------Simulated Annealing (" + str(heur) + ")----------")
+    print("\n---------Simulated Annealing (" + str(heur) + ")----------")
     best = deepcopy(sched)   # best schedule so far
     cur = h(sched, heur)
+    print("initial heuristic value " + str(cur))
 
     # temperatue starts at 1.0 and stops at 0.001
     t = 1.0
     while t > 0.001:
         # TODO: consider doing multiple iterations at each temperature
         cur = h(sched, heur)
-        print("\ncur value: " + str(cur))
+        #print("cur value: " + str(cur))
         # perform a random shift in the schedule and consider moving there
         d = randint(0, sched.num_days-1)
         day = sched.schedule[d] # note: changing this object will change the schedule class
@@ -167,9 +173,9 @@ def simAnneal(sched, heur):
                 # undo changes
                 sched.schedule[d] = oldDay
 
-        t = 0.95 * t           # decrease t
+        t = 0.999 * t           # decrease t
     print("final huerstic value: " + str(cur))
-    print("all time best huerstic value: " + str(h(best, heur)))
+    print("all time best huerstic value: " + str(h(best, heur)) + "\n")
     sched = best
 
 
