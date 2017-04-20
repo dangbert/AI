@@ -1,13 +1,13 @@
 '''
-Name:
-Date:
+Name: Dan Engbert
+Date: 4-20-17
 Project 3: Decision trees
 
 Please do not change the signature of train() or classify(), 
 or you will break the test suite.
 '''
 
-#the following are the values for each attibute in the global context so you can use them as needed
+# the following are the values for each attibute in the global context so you can use them as needed
 work_class = ["Private", "Self-emp-not-inc", "Self-emp-inc", "Federal-gov", "Local-gov", "State-gov", "Without-pay", "Never-worked"]
 
 education = ["Bachelors", "Some-college", "11th", "HS-grad", "Prof-school", "Assoc-acdm", "Assoc-voc", "9th", "7th-8th", "12th", 
@@ -31,31 +31,34 @@ native_country = ["United-States", "Cambodia", "England", "Puerto-Rico", "Canada
                   "Taiwan", "Haiti", "Columbia", "Hungary", "Guatemala", "Nicaragua", "Scotland", "Thailand", "Yugoslavia", 
                   "El-Salvador", "Trinadad&Tobago", "Peru", "Hong", "Holand-Netherlands"]
 
+
+"""
+This function should train a decision tree classifier
+on the data. It should return a usable decision tree.
+How you implement the decision tree is up to you
+(class, dictionary, etc.), but do not use any python packages
+such as scikit-learn.
+
+data: a list of attribute vectors, the entire dataset in integer form
+labels: a list of class labels that correspond to the dataset
+"""
 def train(data, labels):
-    """
-    This function should train a decision tree classifier
-    on the data. It should return a usable decision tree.
-    How you implement the decision tree is up to you 
-    (class, dictionary, etc.), but do not use any python packages
-    such as scikit-learn. 
-
-    data: a list of attribute vectors, the entire dataset in integer form
-    labels: a list of class labels that correspond to the dataset
-    """
     return 1
 
+
+"""
+Given a some data point (known or not) x, this function
+should apply the model (trained in the above function)
+and return the classification of x based on the model.
+
+x: a single integer attribute vector for an adult
+"""
 def classify(x, model):
-    """
-    Given a some data point (known or not) x, this function 
-    should apply the model (trained in the above function)
-    and return the classification of x based on the model. 
-    
-    x: a single integer attribute vector for an adult
-    """
     return 1
 
+
+"""This function converts the categorical values of data_list into integers """
 def convert(data_list):
-    """This function converts the categorical values of data_list into integers """
 
     attributes = [work_class, education, marital, occupation, relationship, race, sex, native_country]
 
@@ -70,6 +73,7 @@ def convert(data_list):
 
     return converted_data
     
+
 def main():
 
     LABELS = ["<=50K",">50K"]
