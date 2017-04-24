@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 '''
 Name: Dan Engbert
 Date: 4-20-17
@@ -6,6 +8,13 @@ Project 3: Decision trees
 Please do not change the signature of train() or classify(), 
 or you will break the test suite.
 '''
+
+from DecisionTree import DecisionTree
+
+# lines in the training data file are of the form:
+# work_class,education,marital,occupation,relationship,race,sex,native_country,income
+# adults are classified into one of two income brackets
+# income = ["<=50K", ">50K"]
 
 # the following are the values for each attibute in the global context so you can use them as needed
 work_class = ["Private", "Self-emp-not-inc", "Self-emp-inc", "Federal-gov", "Local-gov", "State-gov", "Without-pay", "Never-worked"]
@@ -43,7 +52,13 @@ data: a list of attribute vectors, the entire dataset in integer form
 labels: a list of class labels that correspond to the dataset
 """
 def train(data, labels):
-    return 1
+    # data is an array of attribute vectors
+    # e.g. [[0, 7, 5, 2, 3, 4, 0, 18], [1, 3, 0, 4, 2, 0, 1, 0], ...]
+    # labels is an array of class labels (as integers)
+    # e.g. [0,1, ...]
+    model = DecisionTree()
+    model.train(data, labels)
+    return model
 
 
 """
@@ -54,7 +69,7 @@ and return the classification of x based on the model.
 x: a single integer attribute vector for an adult
 """
 def classify(x, model):
-    return 1
+    return model.classify(x)
 
 
 """This function converts the categorical values of data_list into integers """
@@ -93,14 +108,12 @@ def main():
             data.append(convert(line[:-1]))
             labels.append(LABELS.index(line[-1]))
 
-    '''
-    #example run:
+    # example run:
     dT = train(data, labels)
     sample = ["Private","Bachelors","Married-civ-spouse","Exec-managerial","Husband","Asian-Pac-Islander","Male","Japan"] #>50K
     sample = convert(sample)
     lbl = classify(sample, dT)
     print(sample, lbl)
-    '''
 
 if __name__ == "__main__":
     main()
