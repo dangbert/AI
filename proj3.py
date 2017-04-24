@@ -87,7 +87,7 @@ def convert(data_list):
                 converted_data.append(attribute_values.index(attribute_value))
 
     return converted_data
-    
+
 
 def main():
 
