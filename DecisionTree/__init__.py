@@ -1,4 +1,5 @@
 #/usr/bin/python3
+import math
 
 # creates a decision tree based on training data
 # uses the ID3 algorithm with maximum gain
@@ -50,6 +51,24 @@ class DecisionTree:
         if not label in self._label_counts:
             return 0.0
         return self._label_counts[label] / self._numPoints;
+
+
+    def _entropy(self, labels):
+        total = 0.0
+        for i in range(self._numPoints):
+            p = self._getLabelProportion(labels[i])
+            total += -1 * p * math.log(p, 2)
+        return total
+
+
+    def _subsetEntropy(self, data, labels, attr, val):
+        total = 0.0
+        for i in range(self._numPoints):
+            v = data[i]
+            if v[attr] == val:
+                p = self._getLabelProportion(labels[i])
+                total += -1 * p * math.log(p, 2)
+        return total
 
 
     # classify a vector (after training has been completed)
