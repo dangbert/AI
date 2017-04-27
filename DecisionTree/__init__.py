@@ -41,11 +41,6 @@ class DecisionTree:
         # TODO: consider requiring the user to give the range of expected attribute values
         # e.g. a dict where each key is an attribute and it pairs with the highest value it can take on
 
-        #print("data=")
-        #print(data)
-        #print("labels=")
-        #print(labels)
-        #print("\n\n")
         print(self._counts)
         print(self._label_counts)
         # TODO: might not need label_counts
@@ -81,10 +76,9 @@ class DecisionTree:
                 print("**** at a stopping point ***")
                 return
 
-        # TODO: understand why this can happen:
         if len(pAttr) == 0:
-            print("no attributes left!")
-            tree.final_label = self._labels[rlist[0]]
+            print("\nno attributes left!")
+            tree.chooseBest(self._getLabelCount(rlist))
             return
 
         gains = [0 for i in range(len(pAttr))]
@@ -108,17 +102,9 @@ class DecisionTree:
         # if all gains are 0 stop branching and use the most popular label
         # (in some data sets there may be duplicate vectors with different classifications)
         if gains[maxGain] == 0:
-            label_count = self._getLabelCount(rlist)
-            best = list(label_count)[0]
-            for lbl in label_count:
-                if label_count[lbl] > label_count[best]:
-                    best = lbl
-
-            print(label_count)
-            print("all gains are 0, using label " + str(lbl))
-            tree.final_label = best
+            # set tree label to the most popular option amongst the remaining data points
+            tree.chooseBest(self._getLabelCount(rlist))
             return
-
 
         # TODO: should this be pAttr[maxGain]? yes!!!
         tree.attr = pAttr[maxGain]              # attribute number to split on
