@@ -78,20 +78,12 @@ class DecisionTree:
                 break
             if r == (len(rlist) - 1):
                 tree.final_label = first_label
+                print("**** at a stopping point ***")
                 return
 
-        print("pAttr=")
-        print(pAttr)
         # TODO: understand why this can happen:
         if len(pAttr) == 0:
             print("no attributes left!")
-            print("rlist=")
-            print(rlist)
-            for i in rlist:
-                print(str(i) + "-> " + str(self._labels[i]))
-
-        data = self._data
-        labels = self._labels
 
         gains = [0 for i in range(len(pAttr))]
 
@@ -99,14 +91,22 @@ class DecisionTree:
             a = pAttr[i]                        # current attribute
             gains[i] = self._gain(a, rlist)
 
-        print("\ngains = ")
+        print("\nrlist:")
+        for i in rlist:
+            print(str(i) + "-> " + str(self._labels[i]) + "\t" + str(self._data[i]))
+        print("gains = ")
         print(gains)
+        print("pAttr = ")
+        print(pAttr)
         maxGain = 0                             # index of max gain
         for i in range(len(gains)):
             if gains[i] > gains[maxGain]:
                 maxGain = i
 
-        tree.attr = maxGain                     # attribute number to split on
+
+        # TODO: should this be pAttr[maxGain]? yes!!!
+        tree.attr = pAttr[maxGain]              # attribute number to split on
+        print("decided to split on attribute " + str(tree.attr))
         del pAttr[maxGain]                      # remove attribute we're using from list
 
 
@@ -115,6 +115,9 @@ class DecisionTree:
 
         # TODO: avoid having to call this function twice???
         vals_dist = self._valDistribution(tree.attr, rlist)
+        if len(pAttr) < 5:
+            print("vals_dist = ")
+            print(vals_dist)
 
         # possible (remaining) vals for this attribute to take on
         tree.vals = list(vals_dist)
@@ -125,8 +128,8 @@ class DecisionTree:
 
         tree.subTrees = [Tree.Tree() for i in range(len(tree.vals))]
         # iterate over each value to branch off of
+        # recursively create tree for each possible value taken on by the attribute
         for i in range(len(tree.vals)):
-            # recursively create tree for each possible value taken on by the attribute
             self._createTree(tree.subTrees[i], pAttr, vals_dist[tree.vals[i]])
 
 
