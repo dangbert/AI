@@ -1,5 +1,8 @@
 #/usr/bin/python3
 import math
+from DecisionTree import Tree
+from copy import deepcopy
+
 
 # creates a decision tree based on training data
 # uses the ID3 algorithm with maximum gain
@@ -15,11 +18,11 @@ class DecisionTree:
     # len(data) must == len(labels)
     def train(self, data, labels):
         self._numAttributes = len(data[0])
-        self.numPoints = len(data)              # number of (training) data points
+        self._numPoints = len(data)              # number of (training) data points
 
         # array of empty dictionaries
         self._counts = [{} for i in range(self._numAttributes)]
-        self._label_counts = {}                       # number of times each label is used
+        self._label_counts = {}                 # number of times each label is used
 
         for n in range(len(data)):              # iterate over each vector (data point)
             # count number of occurences of each label value
@@ -35,40 +38,144 @@ class DecisionTree:
                     self._counts[i][val] = 0
                 self._counts[i][val] += 1
 
+        #print("data=")
+        #print(data)
+        #print("labels=")
+        #print(labels)
+        #print("\n\n")
         print(self._counts)
         print(self._label_counts)
+        # TODO: might not need label_counts
+        # TODO: consider moving (some) of these functions to Tree class???
+
+        # recursively generate the decision tree based on maximum gain
+        # TODO: consider storing data, labels in the class so that it doesnt have to keep being
+        # passed around. then delete them after training is done
+        tree = Tree.Tree()
+        # indicies of possible vector attributes to consider
+        pAttr = list(range(self._numAttributes))
+        rlist = list(range(len(data)))          # initially all points are remaining in the data set
+        self._labels = labels
+        self._data = data
+        self._createTree(tree, pAttr, rlist)
 
 
-    # get probability of a specified attrbute having a given value
-    def _getProportion(self, attr, val):
-        if not val in self._counts[attr]:
-            return 0.0
-        return self._counts[attr][val] / self._numAttributes;
+    # modifies a tree
+    # pAttr: array of possible attributes to split on
+    # data is the remaining data that made it to this point in the decision tree
+    # rlist = indices (in data/labels) of data points in a given subset of the data
+    def _createTree(self, tree, pAttr, rlist):
+        data = self._data
+        labels = self._labels
+
+        gains = [0 for i in range(len(pAttr))]
+
+        for i in range(len(pAttr)):             # iterate over attribute array
+            a = pAttr[i]                        # current attribute
+            gains[i] = self._gain(a, rlist)
+
+        print("\ngains = ")
+        print(gains)
+        maxGain = 0                             # index of max gain
+        for i in range(len(gains)):
+            if gains[i] > gains[maxGain]:
+                maxGain = i
+
+        tree.attr = pAttr[maxGain]
+        del pAttr[maxGain]                      # remove attribute we're using from list
+        # TODO: counts might need to be remade based on the set???
+        tree.vals = list(self._counts[pAttr[maxGain]])
+        tree.subTrees = [None for i in range(len(tree.vals))]
+        tree.final_label = [None for i in range(len(tree.vals))]
+
+        for i in range(len(tree.vals)):
+            val = tree.vals[i]
+            rlist2 = deepcopy(rlist)
+            # create list of indices in data that are considered "remaining"
+
+            tree.subTrees[i]
+            tree.final_label[i]
+
+            # check if all members of subset are in the same label, if so then stop
+            # else recursively call for each possible value
+            # remove data for each call that does not fit in that subtree
 
 
-    # get proportion of a specific label value amongst all classifications
-    def _getLabelProportion(self, label):
-        if not label in self._label_counts:
-            return 0.0
-        return self._label_counts[label] / self._numPoints;
+
+    # information gain for a specific attribute
+    def _gain(self, a, rlist):
+        return self._entropy(rlist) + self._expectedEntropy(a, rlist)
 
 
-    def _entropy(self, labels):
+    # returns the entropy of a subset of the data
+    # rlist is a list of the indices in data/label that are make up the subset
+    def _entropy(self, rlist):
+        labels = self._labels
         total = 0.0
-        for i in range(self._numPoints):
-            p = self._getLabelProportion(labels[i])
+        label_count = self._getLabelCount(rlist)
+
+        for lbl in label_count:
+            p = self._getLabelProportion(lbl, label_count, len(rlist))
             total += -1 * p * math.log(p, 2)
         return total
 
 
-    def _subsetEntropy(self, data, labels, attr, val):
+    # epected entropy after splitting on attribute number a
+    def _expectedEntropy(self, a, rlist):
+        data = self._data
+        labels = self._labels
         total = 0.0
-        for i in range(self._numPoints):
-            v = data[i]
-            if v[attr] == val:
-                p = self._getLabelProportion(labels[i])
-                total += -1 * p * math.log(p, 2)
+
+        # list of subsets split on each value of the attribute
+        # a subset is represented as a list of relevant indices in data/labels
+        vals = {}
+        for r in rlist:
+            i = rlist[r]                        # relevant index of data point
+            p = data[i]                         # data point
+            if not p[a] in vals:
+                p[a] = []
+            p[a].append(i)
+
+        # iterate over each subset
+        for val in vals:
+            # subset of the (remaining) data such that every elemen has value val for attribute a
+            sub = vals[val]
+            s_v = len(sub)
+            sub_entropy = self._entropy(sub)
+            total += -1 * s_v / len(rlist) * sub_entropy
+
         return total
+
+
+    # create count of label distribution across remaining data points
+    def _getLabelCount(self, rlist):
+        label_count = {}
+        # count number of occurences of each label value
+        for r in rlist:
+            i = rlist[r]                        # relevant index of data point
+            lbl = self._labels[i]               # label of relevant data point
+            if not lbl in label_count:
+                label_count[lbl] = 0
+            label_count[lbl] += 1
+
+        return label_count
+
+
+    # get proportion of a specific label value amongst all (remaining) data points
+    def _getLabelProportion(self, lbl, label_count, numPoints):
+        if not lbl in label_count:
+            return 0.0
+        return label_count[lbl] / numPoints;    # ratio of (remaining) data points with this label
+
+
+    # get probability of a specified attrbute having a given value
+    # a = index of attribute
+    #def _getProportion(self, a, val, rlist):
+    #    attr = a
+    #    if not val in self._counts[attr]:
+    #        return 0.0
+    #    return self._counts[attr][val] / self._numAttributes;
+
 
 
     # classify a vector (after training has been completed)
