@@ -38,6 +38,9 @@ class DecisionTree:
                     self._counts[i][val] = 0
                 self._counts[i][val] += 1
 
+        # TODO: consider requiring the user to give the range of expected attribute values
+        # e.g. a dict where each key is an attribute and it pairs with the highest value it can take on
+
         #print("data=")
         #print(data)
         #print("labels=")
@@ -65,6 +68,28 @@ class DecisionTree:
     # data is the remaining data that made it to this point in the decision tree
     # rlist = indices (in data/labels) of data points in a given subset of the data
     def _createTree(self, tree, pAttr, rlist):
+        # check if all members of subset are in the same label
+        first_label = self._labels[rlist[0]]
+        for r in range(1, len(rlist)):
+            i = rlist[r]
+            # i is the relevant index of a data point
+            lbl = self._labels[i]
+            if lbl != first_label:
+                break
+            if r == (len(rlist) - 1):
+                tree.final_label = first_label
+                return
+
+        print("pAttr=")
+        print(pAttr)
+        # TODO: understand why this can happen:
+        if len(pAttr) == 0:
+            print("no attributes left!")
+            print("rlist=")
+            print(rlist)
+            for i in rlist:
+                print(str(i) + "-> " + str(self._labels[i]))
+
         data = self._data
         labels = self._labels
 
@@ -81,30 +106,32 @@ class DecisionTree:
             if gains[i] > gains[maxGain]:
                 maxGain = i
 
-        tree.attr = pAttr[maxGain]
+        tree.attr = maxGain                     # attribute number to split on
         del pAttr[maxGain]                      # remove attribute we're using from list
 
-        tree.vals = list(self._counts[pAttr[maxGain]])
+
         tree.subTrees = [None for i in range(len(tree.vals))]
         tree.final_label = [None for i in range(len(tree.vals))]
 
+        # TODO: avoid having to call this function twice???
+        vals_dist = self._valDistribution(tree.attr, rlist)
+
+        # possible (remaining) vals for this attribute to take on
+        tree.vals = list(vals_dist)
+
+        #print(vals_dist)
+        #print("tree.vals = ")
+        #print(tree.vals)
+
+        tree.subTrees = [Tree.Tree() for i in range(len(tree.vals))]
+        # iterate over each value to branch off of
         for i in range(len(tree.vals)):
-            val = tree.vals[i]
-            rlist2 = deepcopy(rlist)
-            # create list of indices in data that are considered "remaining"
-
-            tree.subTrees[i]
-            tree.final_label[i]
-
-            # check if all members of subset are in the same label, if so then stop
-            # else recursively call for each possible value
-            # remove data for each call that does not fit in that subtree
-
+            # recursively create tree for each possible value taken on by the attribute
+            self._createTree(tree.subTrees[i], pAttr, vals_dist[tree.vals[i]])
 
 
     # information gain for a specific attribute
     def _gain(self, a, rlist):
-        print("\n...calculating gain for attribute " + str(a))
         return self._entropy(rlist) + self._expectedEntropy(a, rlist)
 
 
@@ -123,21 +150,9 @@ class DecisionTree:
 
     # epected entropy after splitting on attribute number a
     def _expectedEntropy(self, a, rlist):
-        data = self._data
-        labels = self._labels
         total = 0.0
 
-        # list of subsets split on each value of the attribute
-        # a subset is represented as a list of relevant indices in data/labels
-        vals = {}
-
-        for i in rlist:
-            # i is the relevant index of a data point
-            p = data[i]                         # current data point (vector)
-            val = p[a]
-            if not val in vals:
-                vals[val] = []
-            vals[val].append(i)
+        vals = self._valDistribution(a, rlist)
 
         # iterate over each subset
         for val in vals:
@@ -148,8 +163,22 @@ class DecisionTree:
 
             total += -1 * s_v / len(rlist) * sub_entropy
 
-        print("expected entropy = " + str(total))
         return total
+
+
+    def _valDistribution(self, a, rlist):
+        # list of subsets split on each value of the attribute
+        # a subset is represented as a list of relevant indices in data/labels
+        vals = {}
+
+        for i in rlist:
+            # i is the relevant index of a data point
+            p = self._data[i]                   # current data point (vector)
+            val = p[a]
+            if not val in vals:
+                vals[val] = []
+            vals[val].append(i)
+        return vals
 
 
     # create count of label distribution across remaining data points
