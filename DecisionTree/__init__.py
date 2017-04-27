@@ -84,6 +84,8 @@ class DecisionTree:
         # TODO: understand why this can happen:
         if len(pAttr) == 0:
             print("no attributes left!")
+            tree.final_label = self._labels[rlist[0]]
+            return
 
         gains = [0 for i in range(len(pAttr))]
 
@@ -102,6 +104,20 @@ class DecisionTree:
         for i in range(len(gains)):
             if gains[i] > gains[maxGain]:
                 maxGain = i
+
+        # if all gains are 0 stop branching and use the most popular label
+        # (in some data sets there may be duplicate vectors with different classifications)
+        if gains[maxGain] == 0:
+            label_count = self._getLabelCount(rlist)
+            best = list(label_count)[0]
+            for lbl in label_count:
+                if label_count[lbl] > label_count[best]:
+                    best = lbl
+
+            print(label_count)
+            print("all gains are 0, using label " + str(lbl))
+            tree.final_label = best
+            return
 
 
         # TODO: should this be pAttr[maxGain]? yes!!!
