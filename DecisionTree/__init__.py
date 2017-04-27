@@ -83,7 +83,7 @@ class DecisionTree:
 
         tree.attr = pAttr[maxGain]
         del pAttr[maxGain]                      # remove attribute we're using from list
-        # TODO: counts might need to be remade based on the set???
+
         tree.vals = list(self._counts[pAttr[maxGain]])
         tree.subTrees = [None for i in range(len(tree.vals))]
         tree.final_label = [None for i in range(len(tree.vals))]
@@ -104,6 +104,7 @@ class DecisionTree:
 
     # information gain for a specific attribute
     def _gain(self, a, rlist):
+        print("\n...calculating gain for attribute " + str(a))
         return self._entropy(rlist) + self._expectedEntropy(a, rlist)
 
 
@@ -129,12 +130,14 @@ class DecisionTree:
         # list of subsets split on each value of the attribute
         # a subset is represented as a list of relevant indices in data/labels
         vals = {}
-        for r in rlist:
-            i = rlist[r]                        # relevant index of data point
-            p = data[i]                         # data point
-            if not p[a] in vals:
-                p[a] = []
-            p[a].append(i)
+
+        for i in rlist:
+            # i is the relevant index of a data point
+            p = data[i]                         # current data point (vector)
+            val = p[a]
+            if not val in vals:
+                vals[val] = []
+            vals[val].append(i)
 
         # iterate over each subset
         for val in vals:
@@ -142,8 +145,10 @@ class DecisionTree:
             sub = vals[val]
             s_v = len(sub)
             sub_entropy = self._entropy(sub)
+
             total += -1 * s_v / len(rlist) * sub_entropy
 
+        print("expected entropy = " + str(total))
         return total
 
 
@@ -151,8 +156,7 @@ class DecisionTree:
     def _getLabelCount(self, rlist):
         label_count = {}
         # count number of occurences of each label value
-        for r in rlist:
-            i = rlist[r]                        # relevant index of data point
+        for i in rlist:
             lbl = self._labels[i]               # label of relevant data point
             if not lbl in label_count:
                 label_count[lbl] = 0
@@ -166,16 +170,6 @@ class DecisionTree:
         if not lbl in label_count:
             return 0.0
         return label_count[lbl] / numPoints;    # ratio of (remaining) data points with this label
-
-
-    # get probability of a specified attrbute having a given value
-    # a = index of attribute
-    #def _getProportion(self, a, val, rlist):
-    #    attr = a
-    #    if not val in self._counts[attr]:
-    #        return 0.0
-    #    return self._counts[attr][val] / self._numAttributes;
-
 
 
     # classify a vector (after training has been completed)
