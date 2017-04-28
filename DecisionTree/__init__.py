@@ -41,21 +41,19 @@ class DecisionTree:
         # TODO: consider requiring the user to give the range of expected attribute values
         # e.g. a dict where each key is an attribute and it pairs with the highest value it can take on
 
-        print(self._counts)
-        print(self._label_counts)
         # TODO: might not need label_counts
         # TODO: consider moving (some) of these functions to Tree class???
 
         # recursively generate the decision tree based on maximum gain
         # TODO: consider storing data, labels in the class so that it doesnt have to keep being
         # passed around. then delete them after training is done
-        tree = Tree.Tree()
         # indicies of possible vector attributes to consider
         pAttr = list(range(self._numAttributes))
         rlist = list(range(len(data)))          # initially all points are remaining in the data set
         self._labels = labels
         self._data = data
-        self._createTree(tree, pAttr, rlist)
+        self._root = Tree.Tree()
+        self._createTree(self._root, pAttr, rlist)
 
 
     # modifies a tree
@@ -73,11 +71,11 @@ class DecisionTree:
                 break
             if r == (len(rlist) - 1):
                 tree.final_label = first_label
-                print("**** at a stopping point ***")
+                #print("**** at a stopping point ***")
                 return
 
         if len(pAttr) == 0:
-            print("\nno attributes left!")
+            #print("\nno attributes left!")
             tree.chooseBest(self._getLabelCount(rlist))
             return
 
@@ -87,13 +85,13 @@ class DecisionTree:
             a = pAttr[i]                        # current attribute
             gains[i] = self._gain(a, rlist)
 
-        print("\nrlist:")
-        for i in rlist:
-            print(str(i) + "-> " + str(self._labels[i]) + "\t" + str(self._data[i]))
-        print("gains = ")
-        print(gains)
-        print("pAttr = ")
-        print(pAttr)
+        #print("\nrlist:")
+        #for i in rlist:
+        #    print(str(i) + "-> " + str(self._labels[i]) + "\t" + str(self._data[i]))
+        #print("gains = ")
+        #print(gains)
+        #print("pAttr = ")
+        #print(pAttr)
         maxGain = 0                             # index of max gain
         for i in range(len(gains)):
             if gains[i] > gains[maxGain]:
@@ -106,20 +104,17 @@ class DecisionTree:
             tree.chooseBest(self._getLabelCount(rlist))
             return
 
-        # TODO: should this be pAttr[maxGain]? yes!!!
         tree.attr = pAttr[maxGain]              # attribute number to split on
-        print("decided to split on attribute " + str(tree.attr))
+        #print("decided to split on attribute " + str(tree.attr))
         del pAttr[maxGain]                      # remove attribute we're using from list
 
 
         tree.subTrees = [None for i in range(len(tree.vals))]
-        tree.final_label = [None for i in range(len(tree.vals))]
 
-        # TODO: avoid having to call this function twice???
         vals_dist = self._valDistribution(tree.attr, rlist)
-        if len(pAttr) < 5:
-            print("vals_dist = ")
-            print(vals_dist)
+        #if len(pAttr) < 5:
+        #    print("vals_dist = ")
+        #    print(vals_dist)
 
         # possible (remaining) vals for this attribute to take on
         tree.vals = list(vals_dist)
@@ -208,4 +203,12 @@ class DecisionTree:
 
     # classify a vector (after training has been completed)
     def classify(self, x):
-        pass
+        tree = self._root
+        while True:
+            #print("flag top")
+            if tree.final_label != None:
+                #print("flag final_label = " + str(tree.final_label))
+                return tree.final_label
+
+            x_val = x[tree.attr]
+            tree = tree.getRelevantSubtree(x_val)

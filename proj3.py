@@ -113,6 +113,7 @@ def main():
     sample = ["Private","Bachelors","Married-civ-spouse","Exec-managerial","Husband","Asian-Pac-Islander","Male","Japan"] #>50K
     sample = convert(sample)
     lbl = classify(sample, dT)
+    #print("returned lbl = " + str(lbl))
     print(sample, lbl)
 
 if __name__ == "__main__":
