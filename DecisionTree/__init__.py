@@ -7,7 +7,6 @@ from copy import deepcopy
 # creates a decision tree based on training data
 # uses the ID3 algorithm with maximum gain
 class DecisionTree:
-
     # constructor
     def __init__(self):
         pass
@@ -20,47 +19,33 @@ class DecisionTree:
         self._numAttributes = len(data[0])
         self._numPoints = len(data)              # number of (training) data points
 
-        # array of empty dictionaries
-        self._counts = [{} for i in range(self._numAttributes)]
-        self._label_counts = {}                 # number of times each label is used
-
-        for n in range(len(data)):              # iterate over each vector (data point)
-            # count number of occurences of each label value
-            if not labels[n] in self._label_counts:
-                self._label_counts[labels[n]] = 0
-            self._label_counts[labels[n]] += 1
-
-            v = data[n]
-            # for each attribute, count the number of times each value is seen
-            for i in range (self._numAttributes):
-                val = v[i]
-                if not val in self._counts[i]:
-                    self._counts[i][val] = 0
-                self._counts[i][val] += 1
-
         # TODO: consider requiring the user to give the range of expected attribute values
         # e.g. a dict where each key is an attribute and it pairs with the highest value it can take on
 
-        # TODO: might not need label_counts
-        # TODO: consider moving (some) of these functions to Tree class???
-
         # recursively generate the decision tree based on maximum gain
-        # TODO: consider storing data, labels in the class so that it doesnt have to keep being
-        # passed around. then delete them after training is done
-        # indicies of possible vector attributes to consider
         pAttr = list(range(self._numAttributes))
         rlist = list(range(len(data)))          # initially all points are remaining in the data set
         self._labels = labels
         self._data = data
         self._root = Tree.Tree()
-        self._createTree(self._root, pAttr, rlist)
+        self._createTree(self._root, pAttr, rlist, -1,-1)
+        # no longer need to remember the training data
+        #self._data = None
+        #self._labels = None
 
 
     # modifies a tree
     # pAttr: array of possible attributes to split on
     # data is the remaining data that made it to this point in the decision tree
     # rlist = indices (in data/labels) of data points in a given subset of the data
-    def _createTree(self, tree, pAttr, rlist):
+    def _createTree(self, tree, pAttr, rlist, p_a, p_v):
+        tree.parent = [p_a, p_v]
+        #print("\nat (top of) createTree. " + str(tree.parent))
+        #print("rlist:")
+        #print("pAttr = " + str(pAttr))
+        #for i in rlist:
+        #    print(str(i) + "-> " + str(self._labels[i]) + "\t" + str(self._data[i]))
+
         # check if all members of subset are in the same label
         first_label = self._labels[rlist[0]]
         for r in range(1, len(rlist)):
@@ -85,13 +70,7 @@ class DecisionTree:
             a = pAttr[i]                        # current attribute
             gains[i] = self._gain(a, rlist)
 
-        #print("\nrlist:")
-        #for i in rlist:
-        #    print(str(i) + "-> " + str(self._labels[i]) + "\t" + str(self._data[i]))
-        #print("gains = ")
-        #print(gains)
-        #print("pAttr = ")
-        #print(pAttr)
+        #print("gains = " + str(gains))
         maxGain = 0                             # index of max gain
         for i in range(len(gains)):
             if gains[i] > gains[maxGain]:
@@ -109,8 +88,6 @@ class DecisionTree:
         del pAttr[maxGain]                      # remove attribute we're using from list
 
 
-        tree.subTrees = [None for i in range(len(tree.vals))]
-
         vals_dist = self._valDistribution(tree.attr, rlist)
         #if len(pAttr) < 5:
         #    print("vals_dist = ")
@@ -118,16 +95,16 @@ class DecisionTree:
 
         # possible (remaining) vals for this attribute to take on
         tree.vals = list(vals_dist)
-
-        #print(vals_dist)
-        #print("tree.vals = ")
-        #print(tree.vals)
+        #print("tree.vals = " + str(tree.vals))
 
         tree.subTrees = [Tree.Tree() for i in range(len(tree.vals))]
         # iterate over each value to branch off of
         # recursively create tree for each possible value taken on by the attribute
         for i in range(len(tree.vals)):
-            self._createTree(tree.subTrees[i], pAttr, vals_dist[tree.vals[i]])
+            par_a = tree.attr
+            par_v = tree.vals[i]
+            # DEEP COPY pAttr!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11
+            self._createTree(tree.subTrees[i], deepcopy(pAttr), deepcopy(vals_dist[tree.vals[i]]), par_a, par_v)
 
 
     # information gain for a specific attribute
@@ -203,12 +180,24 @@ class DecisionTree:
 
     # classify a vector (after training has been completed)
     def classify(self, x):
+        print("classify called on " + str(x))
+        #print("traversing tree:")
+        #self._root.traverse()
+
+        #print("\nclassifying:*****")
+
+
         tree = self._root
         while True:
             #print("flag top")
             if tree.final_label != None:
-                #print("flag final_label = " + str(tree.final_label))
-                return tree.final_label
+                print("  ...flag final_label = " + str(tree.final_label))
+                if tree.final_label == 0:
+                    return "<=50K"
+                return ">50K"
+                #return tree.final_label
+            #print("splitting on " + str(tree.attr))
+            #print("tree.vals = " + str(tree.vals))
 
             x_val = x[tree.attr]
             tree = tree.getRelevantSubtree(x_val)

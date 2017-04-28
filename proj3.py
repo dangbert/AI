@@ -89,6 +89,11 @@ def convert(data_list):
     return converted_data
 
 
+def test(x, model, expected):
+    lbl = model.classify(x)
+    print(str(x) + " -> " + str(lbl) + " (" + str(expected) + ") expected\n\n")
+    return lbl
+
 def main():
 
     LABELS = ["<=50K",">50K"]
@@ -110,11 +115,36 @@ def main():
 
     # example run:
     dT = train(data, labels)
+    #print("\n------training done-------")
     sample = ["Private","Bachelors","Married-civ-spouse","Exec-managerial","Husband","Asian-Pac-Islander","Male","Japan"] #>50K
     sample = convert(sample)
+
+    #print(data[12])
+    #print(labels[12])
+    #numCorrect = 0
+    #total = 0
+    #for i in range(300):
+    #    total += 1
+    #    lbl = test(data[i], dT, labels[i])
+    #    if lbl == labels[i]:
+    #        numCorrect += 1
+
+    #print("\nsummary: " + str(numCorrect) + " / " + str(total))
+
+
+    #test([0, 0, 0, 7, 2, 0, 1, 0], dT, 1)
+    #test([0, 3, 2, 9, 1, 0, 1, 0], dT, 0)
+    #test([5, 5, 0, 1, 2, 0, 1, 0], dT, 0)
+    #test([0, 1, 0, 5, 2, 0, 1, 0], dT, 1)
+    #test([3, 3, 2, 10, 1, 0, 1, 0], dT, 0)
+    #test([3, 0, 3, 5, 3, 0, 1, 0], dT, 1)
+    #return
+
+
     lbl = classify(sample, dT)
     #print("returned lbl = " + str(lbl))
     print(sample, lbl)
+
 
 if __name__ == "__main__":
     main()

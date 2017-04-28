@@ -8,6 +8,7 @@ class Tree:
         # TODO Initialize array to Nones?
         self.subTrees = []
         self.final_label = None
+        self.parent = [] # parrent's attr, val
 
 
     def chooseBest(self, label_count):
@@ -17,7 +18,7 @@ class Tree:
                 best = lbl
 
         #print("label_count = " + str(label_count))
-        #print("\nall gains are 0, using label " + str(best))
+        #print("all gains are 0, using label " + str(best))
         self.final_label = best
 
 
@@ -27,3 +28,15 @@ class Tree:
                 return self.subTrees[i]
         #print("returning none")
         return None
+
+    def traverse(self):
+        if self.final_label != None:
+            print("\nfinal_label = " + str(self.final_label))
+        else:
+            print("\nsplits on " + str(self.attr))
+            print("  vals = " + str(self.vals))
+            for i in range(len(self.subTrees)):
+                sub = self.subTrees[i]
+                print("\n***** val " + str(self.vals[0]) + ": " + str(id(self)))
+                sub.traverse()
+                print("\tval " + str(self.vals[0]) + "****** " + str(id(self)) + "\n")
