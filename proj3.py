@@ -1,20 +1,17 @@
 #!/usr/bin/python3
 
-'''
+"""
 Name: Dan Engbert
 Date: 4-20-17
 Project 3: Decision trees
-
-Please do not change the signature of train() or classify(), 
-or you will break the test suite.
-'''
+"""
 
 from DecisionTree import DecisionTree
 
 # lines in the training data file are of the form:
 # work_class,education,marital,occupation,relationship,race,sex,native_country,income
 # adults are classified into one of two income brackets
-# income = ["<=50K", ">50K"]
+LABELS = ["<=50K",">50K"]
 
 # the following are the values for each attibute in the global context so you can use them as needed
 work_class = ["Private", "Self-emp-not-inc", "Self-emp-inc", "Federal-gov", "Local-gov", "State-gov", "Without-pay", "Never-worked"]
@@ -42,11 +39,8 @@ native_country = ["United-States", "Cambodia", "England", "Puerto-Rico", "Canada
 
 
 """
-This function should train a decision tree classifier
-on the data. It should return a usable decision tree.
-How you implement the decision tree is up to you
-(class, dictionary, etc.), but do not use any python packages
-such as scikit-learn.
+This function trains a decision tree classifier on the data
+It returns a usable decision tree.
 
 data: a list of attribute vectors, the entire dataset in integer form
 labels: a list of class labels that correspond to the dataset
@@ -63,26 +57,24 @@ def train(data, labels):
 
 """
 Given a some data point (known or not) x, this function
-should apply the model (trained in the above function)
-and return the classification of x based on the model.
+applies the model (trained in the above function)
+and returns the classification of x based on the model.
 
 x: a single integer attribute vector for an adult
 """
 def classify(x, model):
-    return model.classify(x)
+    res = model.classify(x)
+    return LABELS[res]                          # return the label, not the label index
 
 
-"""This function converts the categorical values of data_list into integers """
+""" This function converts the categorical values of data_list into integers """
 def convert(data_list):
-
     attributes = [work_class, education, marital, occupation, relationship, race, sex, native_country]
 
     converted_data = []
 
     for attribute_value in data_list:
-
         for attribute_values in attributes:
-
             if attribute_value in attribute_values:
                 converted_data.append(attribute_values.index(attribute_value))
 
@@ -91,20 +83,16 @@ def convert(data_list):
 
 def test(x, model, expected):
     lbl = model.classify(x)
-    print(str(x) + " -> " + str(lbl) + " (" + str(expected) + ") expected\n\n")
+    #print(str(x) + " -> " + str(lbl) + " (" + str(expected) + ") expected\n")
     return lbl
 
+
 def main():
-
-    LABELS = ["<=50K",">50K"]
-
-    #here is some code that reads the data from the current dir
-    #feel free to change this as you wish
+    # reads the data from the file adult.data
     with open("adult.data") as f:
         data = []
         labels = []
         for line in f:
-
             #skip bad data
             if len(line) < 10 or "?" in line:
                 continue
@@ -113,37 +101,19 @@ def main():
             data.append(convert(line[:-1]))
             labels.append(LABELS.index(line[-1]))
 
-    # example run:
-    dT = train(data, labels)
-    #print("\n------training done-------")
-    sample = ["Private","Bachelors","Married-civ-spouse","Exec-managerial","Husband","Asian-Pac-Islander","Male","Japan"] #>50K
-    sample = convert(sample)
+    model = train(data, labels)
 
-    #print(data[12])
-    #print(labels[12])
-    #numCorrect = 0
-    #total = 0
-    #for i in range(300):
-    #    total += 1
-    #    lbl = test(data[i], dT, labels[i])
-    #    if lbl == labels[i]:
-    #        numCorrect += 1
+    # now perform some tests on known data points
+    numCorrect = 0
+    total = 0
+    for i in range(5000):
+        total += 1
+        lbl = test(data[i], model, labels[i])
+        if lbl == labels[i]:
+            numCorrect += 1
 
-    #print("\nsummary: " + str(numCorrect) + " / " + str(total))
-
-
-    #test([0, 0, 0, 7, 2, 0, 1, 0], dT, 1)
-    #test([0, 3, 2, 9, 1, 0, 1, 0], dT, 0)
-    #test([5, 5, 0, 1, 2, 0, 1, 0], dT, 0)
-    #test([0, 1, 0, 5, 2, 0, 1, 0], dT, 1)
-    #test([3, 3, 2, 10, 1, 0, 1, 0], dT, 0)
-    #test([3, 0, 3, 5, 3, 0, 1, 0], dT, 1)
-    #return
-
-
-    lbl = classify(sample, dT)
-    #print("returned lbl = " + str(lbl))
-    print(sample, lbl)
+    print("\nsummary: " + str(numCorrect) + " / " + str(total))
+    print(" = " + str(float(numCorrect / total * 100)) + "%")
 
 
 if __name__ == "__main__":

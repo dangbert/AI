@@ -30,8 +30,8 @@ class DecisionTree:
         self._root = Tree.Tree()
         self._createTree(self._root, pAttr, rlist, -1,-1)
         # no longer need to remember the training data
-        #self._data = None
-        #self._labels = None
+        self._data = []
+        self._labels = []
 
 
     # modifies a tree
@@ -180,24 +180,10 @@ class DecisionTree:
 
     # classify a vector (after training has been completed)
     def classify(self, x):
-        print("classify called on " + str(x))
-        #print("traversing tree:")
-        #self._root.traverse()
-
-        #print("\nclassifying:*****")
-
-
         tree = self._root
         while True:
-            #print("flag top")
             if tree.final_label != None:
-                print("  ...flag final_label = " + str(tree.final_label))
-                if tree.final_label == 0:
-                    return "<=50K"
-                return ">50K"
-                #return tree.final_label
-            #print("splitting on " + str(tree.attr))
-            #print("tree.vals = " + str(tree.vals))
+                return tree.final_label
 
             x_val = x[tree.attr]
             tree = tree.getRelevantSubtree(x_val)
