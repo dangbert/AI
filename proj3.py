@@ -1,9 +1,8 @@
 #!/usr/bin/python3
-
 """
-Name: Dan Engbert
-Date: 4-20-17
-Project 3: Decision trees
+Dan Engbert
+4-20-17
+CMSC 471: Decision trees
 """
 
 from DecisionTree import DecisionTree
@@ -49,7 +48,7 @@ def train(data, labels):
     # data is an array of attribute vectors
     # e.g. [[0, 7, 5, 2, 3, 4, 0, 18], [1, 3, 0, 4, 2, 0, 1, 0], ...]
     # labels is an array of class labels (as integers)
-    # e.g. [0,1, ...]
+    # e.g. [0, 1, ...]
     model = DecisionTree()
     model.train(data, labels)
     return model
@@ -88,7 +87,7 @@ def test(x, model, expected):
 
 
 def main():
-    # reads the data from the file adult.data
+    # read the data from the file adult.data
     with open("adult.data") as f:
         data = []
         labels = []
@@ -101,7 +100,7 @@ def main():
             data.append(convert(line[:-1]))
             labels.append(LABELS.index(line[-1]))
 
-    model = train(data, labels)
+    model = train(data, labels)                 # create a decision tree based on the data
 
     # now perform some tests on known data points
     numCorrect = 0

@@ -71,9 +71,9 @@ class DecisionTree:
         tree.subTrees = [Tree.Tree() for i in range(len(tree.vals))]
 
         # iterate over each value to branch off of
-        # recursively create tree for each possible value taken on by the attribute
         # use deep copies of pAttr!
         for i in range(len(tree.vals)):
+            # recursively create tree
             self._createTree(tree.subTrees[i], deepcopy(pAttr), vals_dist[tree.vals[i]])
 
 

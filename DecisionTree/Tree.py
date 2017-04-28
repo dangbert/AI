@@ -6,7 +6,6 @@ class Tree:
         self.vals = []
         self.subTrees = []
         self.final_label = None
-        #TODO: delete this:
 
 
     # chooses the best attribute to split on when an attribute has to be chosen
