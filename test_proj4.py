@@ -1,7 +1,8 @@
+#!/usr/bin/python3
 '''
 Project 4: K-means Classificiation
-Author:
-Date: 
+Author: Dan Engbert
+Date: 5-9-17
 
 Tests your implementation of K-means on the test set.
 '''
