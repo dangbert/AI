@@ -12,6 +12,7 @@ from Kmeans import Kmeans
 def train(data, labels, k=3):
     model = Kmeans()
     model.train(data, labels, k)
+    return model
 
 
 """Classify a sample using the given model."""
