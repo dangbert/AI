@@ -29,6 +29,8 @@ def test():
         total += 1
         sample = list(map(float, line.strip().split(",")))
         prediction = classify(sample, model)
+        print("classified as '" + str(prediction) + "'")
+        print("actual = '" + str(actual) + "'\n")
 
         #did the model get it right?
         if prediction == actual:

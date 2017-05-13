@@ -13,33 +13,32 @@ class Kmeans:
         self._labels = labels
         self._k = k
 
+        # TODO: remove functions' (clusters) parameter later where possible
+
         remaining = deepcopy(self._data)
         clusters = self._generateInitial()
+        self._clusters = clusters
 
         changed = True
+        # continue until the clusters stop changing
         while changed:
             print("\n\n--- at top ---")
-            # reset the clusters (delete their data points)
+            # reset the clusters (remove their data points)
             self._resetClusters(clusters)
 
+            # iterate over each data point
+            # and add it to the nearest cluster
             for i in range(len(self._data)):
                 x = self._data[i]
-                # find the closest cluster
-                closest = 0                     # index of closest cluster
-                min = self._distance(x, clusters[0].center)
+                clust = self._findClosest(x, clusters)
+                clust.add(i)
 
-                for n in range(1, self._k):
-                    dist = self._distance(x, clusters[n].center)
-                    if dist < min:
-                        dist = min
-                        closest = n
-
-                clusters[closest].add(i)
             changed = self._wasChanged(clusters)
             if changed:
                 print("recalculating centers")
                 self._calculateCenters(clusters)
 
+        # TODO: consider printing all the final clusters
 
     # create k random clusters
     def _generateInitial(self):
@@ -74,6 +73,9 @@ class Kmeans:
 
     # returns the distance squared between two vectors
     def _distance(self, x, center):
+        #print("  \ncalculating distance between ")
+        #print("    " + str(x))
+        #print("    " + str(center))
         total = 0
         for i in range(len(x)):
             total += math.pow(center[i] - x[i], 2)
@@ -88,6 +90,22 @@ class Kmeans:
         return False
 
 
+    # return the cluster closest to vector x
+    def _findClosest(self, x, clusters):
+        # find the closest cluster
+        closest = 0                     # index of closest cluster
+        min = self._distance(x, clusters[0].center)
+
+        for n in range(1, self._k):
+            dist = self._distance(x, clusters[n].center)
+            if dist < min:
+                min = dist
+                closest = n
+        return clusters[closest]
+
+
     # classify a vector (after training has been completed)
     def classify(self, x):
-        print("in classify")
+        clust = self._findClosest(x, self._clusters)
+        lbl = clust.getLabel()
+        return lbl

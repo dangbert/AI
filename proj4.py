@@ -18,4 +18,4 @@ def train(data, labels, k=3):
 """Classify a sample using the given model."""
 def classify(x, model):
     res = model.classify(x)
-    #return LABELS[res]                          # return the label, not the label index
+    return res

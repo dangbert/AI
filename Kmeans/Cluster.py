@@ -19,13 +19,16 @@ class Cluster:
     def getLabel(self):
         dist = {}                               # lable distribution
         for index in self.members:
-            l = self._lables[index]
+            l = self._labels[index]
             if l not in dist:
                 dist[l] = 0
             dist[l] += 1
 
-        best = dist.keys()[0]
+        first = 1
         for key in dist:
+            if first:
+                first = 0
+                best = key
             if dist[key] > dist[best]:
                 best = key
 
@@ -50,10 +53,10 @@ class Cluster:
         return False
 
 
+    # recalculate cluster center
     def recalculate(self):
         # handle when the cluster is empty (no members)
         if len(self.members) == 0:
-            self.center = None
             return
 
         print("\nrecalculating")
