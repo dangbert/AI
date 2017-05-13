@@ -54,7 +54,7 @@ class Kmeans:
             index.append(r)
 
         for i in range(len(index)):
-            c = Cluster.Cluster()
+            c = Cluster.Cluster(self._data, self._labels)
             c.center = self._data[index[i]]
             initial.append(c)
         return initial
@@ -69,7 +69,7 @@ class Kmeans:
     # remove all data points from the clusters
     def _calculateCenters(self, clusters):
         for c in clusters:
-            c.recalculate(self._data)
+            c.recalculate()
 
 
     # returns the distance squared between two vectors
