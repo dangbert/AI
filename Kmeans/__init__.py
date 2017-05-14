@@ -17,9 +17,6 @@ class Kmeans:
         changed = True
         # continue until the clusters stop changing
         while changed:
-            # reset the clusters (remove their data points)
-            self._resetClusters()
-
             # iterate over each data point and add it to the nearest cluster
             for i in range(len(self._data)):
                 x = self._data[i]
@@ -35,8 +32,8 @@ class Kmeans:
         print("\nCLUSTERS:")
         for i in range(self._k):
             print(self._clusters[i].center)
-            print("\tnum points: " + str(len(self._clusters[i].members)))
-            print("\tlabel: " + str(self._clusters[i].getLabel()) + "\n")
+            print("\tnum points: " + str(len(self._clusters[i]._members)))
+            print("\tlabel: " + str(self._clusters[i].label) + "\n")
 
 
     # create k random clusters
@@ -58,13 +55,8 @@ class Kmeans:
         return initial
 
 
-    # remove all data points from the clusters in preperation for next cycle
-    def _resetClusters(self):
-        for c in self._clusters:
-            c.reset()
-
-
-    # remove all data points from the clusters
+    # recalculate each cluster's center and label
+    # also remove data point cluster assignments
     def _calculateCenters(self):
         for c in self._clusters:
             c.recalculate()
@@ -103,5 +95,4 @@ class Kmeans:
     # classify a vector (after training has been completed)
     def classify(self, x):
         clust = self._findClosest(x)
-        lbl = clust.getLabel()
-        return lbl
+        return clust.label
