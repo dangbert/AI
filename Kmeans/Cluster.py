@@ -16,7 +16,10 @@ class Cluster:
 
 
     # get most popular label of this cluster
+    # TODO: just set self._label when recalculate is called()
     def getLabel(self):
+        #print("members: " + str(self.members))
+
         dist = {}                               # lable distribution
         for index in self.members:
             l = self._labels[index]
@@ -25,6 +28,10 @@ class Cluster:
             dist[l] += 1
 
         first = 1
+        if len(dist) == 0:
+            print("length 0")
+
+        best = -1
         for key in dist:
             if first:
                 first = 0
@@ -41,6 +48,7 @@ class Cluster:
         self.members = []
 
 
+    # returns true if members is different from oldMembers
     def isChanged(self):
         if len(self.members) != len(self._oldMembers):
             return True
@@ -59,18 +67,21 @@ class Cluster:
         if len(self.members) == 0:
             return
 
-        print("\nrecalculating")
-        print(self.members)
+        #print("\nrecalculating")
+        #print(self.members)
         size = len(self._data[self.members[0]])
         mean = [0] * size
+
         for val in self.members:
-            point = self._data[val]
+            x = self._data[val]
             for i in range(size):
-                mean[i] += point[i]
+                mean[i] += x[i]
 
         # convert totals to means
-        for val in mean:
-            val = val / len(self.members)
-        print("old center: " + str(self.center))
+        #print("total: " + str(mean))
+        #print("num members: " + str(len(self.members)))
+        for i in range(len(mean)):
+            mean[i] = mean[i] / len(self.members)
+        #print("old center: " + str(self.center))
         self.center = mean
-        print("       new: " + str(self.center))
+        #print("       new: " + str(self.center) + "\n")
