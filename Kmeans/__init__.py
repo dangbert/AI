@@ -46,7 +46,7 @@ class Kmeans:
 
         # assumes k <= len(self._data)
         for i in range(self._k):
-            r = randint(0, len(self._data))
+            r = randint(0, len(self._data)-1)   # the range is inclusive
             while r in index:
                 r = randint(0, len(self._data))
             index.append(r)
