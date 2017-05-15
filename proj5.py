@@ -3,4 +3,8 @@ from Tfidf import Tfidf
 
 files = ["apple.txt", "facebook.txt", "google.txt", "microsoft.txt", "tesla.txt"]
 
-tf = Tfidf(files)
+model = Tfidf(files)
+
+for name in files:
+    model.getTop(5, name, True)
+    print()
