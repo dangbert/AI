@@ -1,3 +1,6 @@
+# Dan Engbert
+# CMSC 471 - Spring 2017
+
 from Tfidf import Document
 from math import log
 from copy import deepcopy
