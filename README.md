@@ -1,7 +1,7 @@
 # Graph Search
 
 ### PURPOSE:
-To search a directional graph for a target node.
+To search a directional graph for a target node using Breadth First Search (BFS), Depth First Search (DFS), or Uniform Cost Search (UCS)
 
 ### HOW IT WORKS:
 The general purpose decision tree is implemented as a package in the DecisionTree folder.
@@ -14,6 +14,10 @@ The proj3.py file is an example usage of the DecisionTree package.  It trains us
 * input_file: is the filename of a text file defining the graph
 * start_node: is the integer (node) to start the search from
 * end_node: is the integer (node) that is being searched for
+* search_type: picks which search algorithm to use
+  * ````BFS```` for Breadth First Search
+  * ````DFS```` for Depth First Search
+  * ````UCS```` for Uniform Cost Search
 
 Example input file:
 ````
