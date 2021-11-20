@@ -1,0 +1,3 @@
+[submodule "DeepLearningPython35"]
+	path = DeepLearningPython35
+	url = git@github.com:dangbert/DeepLearningPython35.git
