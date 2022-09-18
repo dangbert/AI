@@ -1,0 +1,15 @@
+{
+  "name": "salesman",
+  "version": "1.0.0",
+  "description": "Evolutionary algorithm for solving traveling salesman problem.",
+  "main": "index.js",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start": "yarn build && node dist/salesman.js",
+    "build": "npx tsc"
+  },
+  "devDependencies": {
+    "typescript": "^4.8.3"
+  }
+}

@@ -1,2 +1,3 @@
-__pycache__/
-Tfidf/__pycache__/
+**/__pycache__/
+**/node_modules/
+yarn-*.log*
