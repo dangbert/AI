@@ -1,6 +1,7 @@
-console.log('hello world');
+import Agent, { Point } from './Agent.js';
+import _ from 'lodash';
 
-const points = [
+const points: Point[] = [
   {
     x: 52.33376991193947,
     y: 4.865569696293274,
@@ -48,8 +49,40 @@ const points = [
   },
 ];
 
-const totalPoints = points.length;
+(async () => {
+  //const genome: Genome = {};
 
-interface Genome {}
+  const totalPoints = points.length;
 
-const genome: Genome = {};
+  const popSize = 20;
+
+  const maxGenerations = 20;
+  let population: Agent[] = []; // = new Array(popSize).fill(new Agent(totalPoints));
+
+  for (let i = 0; i < popSize; i++) {
+    population.push(new Agent(totalPoints));
+  }
+
+  for (let i = 0; i < maxGenerations; i++) {
+    console.log(population[i].getFitness(points));
+    console.log(population[i]);
+  }
+
+  for (let n = 0; n < maxGenerations; n++) {
+    let fitnesses = population.map((agent) => agent.getFitness(points));
+    const avgFitness = _.mean(fitnesses);
+    const minFitness = _.min(fitnesses);
+    const maxFitness = _.max(fitnesses);
+    //const avgFitness =
+    //  population.reduce<number>(
+    //    (sum: number, cur: Agent) => sum + cur.getFitness(points),
+    //    0
+    //  ) / population.length;
+
+    console.log(
+      `\ngeneration: ${n},\tfitness: avg ${avgFitness.toFixed(
+        2
+      )}, max ${maxFitness.toFixed(2)}, min ${minFitness.toFixed(2)}`
+    );
+  }
+})();

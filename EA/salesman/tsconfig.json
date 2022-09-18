@@ -3,9 +3,9 @@
     "module": "ESNext",
     "esModuleInterop": true,
     "target": "es6",
-    "moduleResolution": "node",
+    "moduleResolution": "Node",
     "sourceMap": true,
-    "outDir": "dist"
+    "outDir": "dist",
   },
   "lib": ["es2015"]
 }
