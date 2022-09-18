@@ -1,0 +1,12 @@
+{
+    // https://stackoverflow.com/a/51550043`
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "type": "npm",
+            "script": "build",
+            "problemMatcher": []
+        }
+    ]
+}

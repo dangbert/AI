@@ -49,40 +49,88 @@ const points: Point[] = [
   },
 ];
 
+/**
+ * return array of indices of parents selected randomly from population based on relative fitness.
+ */
+const selectParents = (
+  count: number,
+  pop: Agent[],
+  maxFitness: number
+): number[] => {
+  const pool = _.shuffle(pop);
+  const parentIndices = [];
+  const used = new Set<number>();
+
+  while (parentIndices.length < count) {
+    for (let i = 0; i < pool.length; i++) {
+      if (used.has(i)) continue;
+      const prob = pool[i].fitness / maxFitness;
+      if (_.random(0, 1, true) <= prob) parentIndices.push(i);
+    }
+  }
+  parentIndices.slice(0, count);
+  return parentIndices;
+};
+
+const prunePopulation = (
+  pop: Agent[],
+  maxFitness: number,
+  targetSize: number
+) => {
+  const newPop = [];
+  for (const agent of pop) {
+    if (newPop.length >= targetSize) break;
+    const prob = agent.fitness / maxFitness;
+    if (_.random(0, 1, true) <= prob) newPop.push(agent);
+  }
+  return newPop;
+};
+
 (async () => {
-  //const genome: Genome = {};
-
   const totalPoints = points.length;
-
-  const popSize = 20;
-
+  const targetPopSize = 20; // desired population size
   const maxGenerations = 20;
-  let population: Agent[] = []; // = new Array(popSize).fill(new Agent(totalPoints));
 
-  for (let i = 0; i < popSize; i++) {
-    population.push(new Agent(totalPoints));
+  //let population: Agent[] = []; // = new Array(popSize).fill(new Agent(totalPoints));
+  let pop: Agent[] = []; // = new Array(targetPopSize).fill(new Agent(totalPoints));
+  for (let i = 0; i < targetPopSize; i++) {
+    pop.push(new Agent(totalPoints));
   }
 
-  for (let i = 0; i < maxGenerations; i++) {
-    console.log(population[i].getFitness(points));
-    console.log(population[i]);
-  }
-
+  console.log(`starting generations... (totalPoints = ${totalPoints})`);
   for (let n = 0; n < maxGenerations; n++) {
-    let fitnesses = population.map((agent) => agent.getFitness(points));
+    pop.sort((a, b) => b.fitness - a.fitness); // sort highest -> lowest
+
+    let fitnesses = pop.map((agent) => agent.getFitness(points));
     const avgFitness = _.mean(fitnesses);
     const minFitness = _.min(fitnesses);
     const maxFitness = _.max(fitnesses);
-    //const avgFitness =
-    //  population.reduce<number>(
-    //    (sum: number, cur: Agent) => sum + cur.getFitness(points),
-    //    0
-    //  ) / population.length;
 
+    // report stats
     console.log(
-      `\ngeneration: ${n},\tfitness: avg ${avgFitness.toFixed(
+      `\ngeneration: ${n},\tpop size: ${
+        pop.length
+      }, fitness: avg ${avgFitness.toFixed(2)}, max ${maxFitness.toFixed(
         2
-      )}, max ${maxFitness.toFixed(2)}, min ${minFitness.toFixed(2)}`
+      )}, min ${minFitness.toFixed(2)}`
     );
+
+    pop = _.shuffle(pop);
+
+    // select agents to breed (probability of reproducing based on relative fitness)
+    // breed until we have doubled the population
+    while (pop.length < targetPopSize * 2) {
+      const parents = selectParents(2, pop, maxFitness).map((i) => pop[i]);
+      //pop = pop.concat(Agent.crossover(parents[0], parents[1]).map(g => new Agent(g.length, g))):;
+      const children = Agent.breed(parents[0], parents[1]);
+      pop = pop.concat(children);
+    }
+    console.log(`grew population to size: ${pop.length}`);
+
+    // TODO: later mutate agents with chance of 0.1
+
+    // select popSize agents to keep (probability of surviving based on relative fitness)
+    pop = prunePopulation(pop, maxFitness, targetPopSize);
+    console.log(`pruned population to size: ${pop.length}`);
   }
 })();

@@ -7,10 +7,13 @@
   "type": "module",
   "scripts": {
     "start": "yarn build && node dist/salesman.js",
+    "test": "yarn build && yarn mocha dist/test",
     "build": "npx tsc"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.185",
+    "chai": "^4.3.6",
+    "mocha": "^10.0.0",
     "typescript": "^4.8.3"
   },
   "dependencies": {
