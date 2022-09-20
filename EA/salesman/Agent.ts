@@ -8,15 +8,15 @@ export interface Point {
 export type Genome = number[]; // list of indices into array: Point[]
 
 export default class Agent {
-  _nextId: number = 0;
+  static _nextId: number = 0;
   id: number;
   genome: Genome;
   fitness: number;
 
   public constructor(problemSize: number = 0, genome?: Genome) {
-    this.id = this._nextId;
-    this._nextId += 1;
-    this.fitness = -1;
+    this.id = Agent._nextId;
+    Agent._nextId += 1;
+    this.fitness = 0; // placeholder for now
 
     problemSize = problemSize || genome.length || 0;
 
@@ -41,7 +41,7 @@ export default class Agent {
           Math.pow(points[this.genome[i - 1]].y - points[this.genome[i]].y, 2)
       );
     }
-    this.fitness = -1 * fitness * 100; // scaling up for readability
+    this.fitness = 1 / fitness; // taking inverse so larger fitness values are better
     return this.fitness;
   }
 
@@ -71,7 +71,7 @@ export default class Agent {
     // TODO: use a gaussian offset from the center index
     //  (bias crossover towards center index)
     if (splitIndex === -1) splitIndex = _.random(1, size, false);
-    console.log(`splitIndex = ${splitIndex}`);
+    //console.log(`splitIndex = ${splitIndex}`);
 
     let children = [];
     for (let count = 0; count < 2; count++) {
@@ -80,15 +80,19 @@ export default class Agent {
       const p2 = count ? g1 : g2;
 
       const child: Genome = p1.slice(0, splitIndex + 1);
+      //console.log('initial child genome:');
+      //console.log(child);
 
       let used = new Set<number>(child); // already used values
       let i = splitIndex + 1;
       while (child.length < size) {
-        i = (i + 1) % size;
+        //console.log(`i=${i}, considering adding ${p2[i]}`);
         if (!used.has(p2[i])) {
+          //console.log(`  adding ${p2[i]} (i=${i})`);
           used.add(p2[i]);
           child.push(p2[i]);
         }
+        i = (i + 1) % size;
       }
       children.push(child);
     }

@@ -51,36 +51,81 @@ const points: Point[] = [
 
 /**
  * return array of indices of parents selected randomly from population based on relative fitness.
+ * @param count number of Agents to select from pop to be parents.
  */
-const selectParents = (
-  count: number,
-  pop: Agent[],
-  maxFitness: number
-): number[] => {
+const selectParents = (count: number, pop: Agent[]): number[] => {
+  const fitnessSum = _.sum(pop.map((a) => a.fitness));
   const pool = _.shuffle(pop);
-  const parentIndices = [];
+  let parentIndices = [];
   const used = new Set<number>();
 
+  let i = -1;
   while (parentIndices.length < count) {
-    for (let i = 0; i < pool.length; i++) {
-      if (used.has(i)) continue;
-      const prob = pool[i].fitness / maxFitness;
-      if (_.random(0, 1, true) <= prob) parentIndices.push(i);
-    }
+    i = (i + 1) % pop.length;
+    if (used.has(i)) continue;
+    const prob = pool[i].fitness / fitnessSum;
+    const val = _.random(0, 1, true);
+    if (val <= prob) parentIndices.push(i);
   }
-  parentIndices.slice(0, count);
+  parentIndices = parentIndices.slice(0, count);
   return parentIndices;
 };
 
-const prunePopulation = (
-  pop: Agent[],
-  maxFitness: number,
-  targetSize: number
-) => {
-  const newPop = [];
-  for (const agent of pop) {
+/**
+ * Selects agents to breed (probability of reproducing based on relative fitness).
+ * Breed untils we reach population of size tagetSize (or can't produce any more unique genomes).
+ *
+ * @param pop
+ * @param targetSize
+ */
+const createChildren = (count: number, pop: Agent[]) => {
+  const existingGenomes = new Set<string>(pop.map((a) => a.genome.join(',')));
+  let children: Agent[] = [];
+  const numChildren = count * 1.0;
+  const maxAttempts = numChildren * 50; // max times to try to create new unqiue genomes
+  let attempts = 0;
+  while (children.length < numChildren && attempts < maxAttempts) {
+    const parents = selectParents(2, pop).map((i) => pop[i]);
+    /*
+    console.log(
+      `selected parents with Ids: ${
+        parents[0].id
+      } (fitness ${parents[0].fitness.toFixed(2)}), ${
+        parents[1].id
+      } (fitness ${parents[1].fitness.toFixed(2)})`
+    );
+    */
+    let newChildren = Agent.breed(parents[0], parents[1]);
+    // ensure no duplicates are added to population!
+    for (const a of newChildren) {
+      if (existingGenomes.has(a.genome.join(','))) continue;
+      children = children.concat(newChildren);
+      existingGenomes.add(a.genome.join(','));
+    }
+    attempts += 1;
+  }
+  children.forEach((c) => c.getFitness(points)); // compute fitness
+  return children;
+};
+
+/**
+ * Perform selection on population, returning a subset of the original population of targetSize members.
+ * @param pop
+ * @param targetSize
+ * @returns
+ */
+const prunePopulation = (pop: Agent[], targetSize: number) => {
+  const fitnessSum = _.sum(pop.map((a) => a.fitness));
+  const used = new Set<number>();
+  const newPop: Agent[] = [];
+
+  let i = -1;
+  while (newPop.length < targetSize) {
+    i = (i + 1) % pop.length;
+    if (used.has(i)) continue;
+    const agent = pop[i];
     if (newPop.length >= targetSize) break;
-    const prob = agent.fitness / maxFitness;
+    const prob = agent.fitness / fitnessSum;
     if (_.random(0, 1, true) <= prob) newPop.push(agent);
   }
   return newPop;
@@ -89,7 +134,7 @@ const prunePopulation = (
 (async () => {
   const totalPoints = points.length;
   const targetPopSize = 20; // desired population size
-  const maxGenerations = 20;
+  const maxGenerations = 100;
 
   //let population: Agent[] = []; // = new Array(popSize).fill(new Agent(totalPoints));
   let pop: Agent[] = []; // = new Array(targetPopSize).fill(new Agent(totalPoints));
@@ -117,20 +162,17 @@ const prunePopulation = (
 
     pop = _.shuffle(pop);
 
-    // select agents to breed (probability of reproducing based on relative fitness)
-    // breed until we have doubled the population
-    while (pop.length < targetPopSize * 2) {
-      const parents = selectParents(2, pop, maxFitness).map((i) => pop[i]);
-      //pop = pop.concat(Agent.crossover(parents[0], parents[1]).map(g => new Agent(g.length, g))):;
-      const children = Agent.breed(parents[0], parents[1]);
-      pop = pop.concat(children);
-    }
+    // breed until we have doubled the population (or can't produce any more unique genomes)
+    const children = createChildren(targetPopSize * 1.0, pop);
+    pop = pop.concat(children);
     console.log(`grew population to size: ${pop.length}`);
 
-    // TODO: later mutate agents with chance of 0.1
+    // TODO: mutate agents with chance of 0.1
 
     // select popSize agents to keep (probability of surviving based on relative fitness)
-    pop = prunePopulation(pop, maxFitness, targetPopSize);
+    pop = prunePopulation(pop, targetPopSize);
     console.log(`pruned population to size: ${pop.length}`);
   }
+  console.log('done!');
+  // TODO: write csv of stats to file!
 })();
