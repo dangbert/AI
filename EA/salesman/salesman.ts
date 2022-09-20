@@ -133,7 +133,7 @@ const prunePopulation = (pop: Agent[], targetSize: number) => {
 
 (async () => {
   const totalPoints = points.length;
-  const targetPopSize = 20; // desired population size
+  const targetPopSize = 50; // desired population size
   const maxGenerations = 100;
 
   //let population: Agent[] = []; // = new Array(popSize).fill(new Agent(totalPoints));
@@ -141,6 +141,7 @@ const prunePopulation = (pop: Agent[], targetSize: number) => {
   for (let i = 0; i < targetPopSize; i++) {
     pop.push(new Agent(totalPoints));
   }
+  let bestAgent = pop[0];
 
   console.log(`starting generations... (totalPoints = ${totalPoints})`);
   for (let n = 0; n < maxGenerations; n++) {
@@ -151,6 +152,13 @@ const prunePopulation = (pop: Agent[], targetSize: number) => {
     const minFitness = _.min(fitnesses);
     const maxFitness = _.max(fitnesses);
 
+    if (maxFitness > bestAgent.fitness) {
+      bestAgent = pop.reduce<Agent>(
+        (best, cur) => (cur.fitness > best.fitness ? cur : best),
+        pop[0]
+      );
+    }
+
     // report stats
     console.log(
       `\ngeneration: ${n},\tpop size: ${
@@ -160,6 +168,18 @@ const prunePopulation = (pop: Agent[], targetSize: number) => {
       )}, min ${minFitness.toFixed(2)}`
     );
 
+    // mutate agents (swap 2 elements in genome with a low probability)
+    pop.forEach((a) => {
+      if (_.random(0, 1, true) > 0.05) return;
+      // swap two elements in genome
+      const index1 = _.random(0, a.genome.length - 1, false);
+      const index2 = _.random(0, a.genome.length - 1, false);
+      const tmp = a.genome[index1];
+      a.genome[index1] = a.genome[index2];
+      a.genome[index2] = tmp;
+      a.getFitness(points);
+    });
+
     pop = _.shuffle(pop);
 
     // breed until we have doubled the population (or can't produce any more unique genomes)
@@ -167,12 +187,22 @@ const prunePopulation = (pop: Agent[], targetSize: number) => {
     pop = pop.concat(children);
     console.log(`grew population to size: ${pop.length}`);
 
-    // TODO: mutate agents with chance of 0.1
-
     // select popSize agents to keep (probability of surviving based on relative fitness)
     pop = prunePopulation(pop, targetPopSize);
     console.log(`pruned population to size: ${pop.length}`);
   }
-  console.log('done!');
+  console.log(`\n\nbest all time agent:`);
+  console.log(bestAgent);
+
+  console.log('\nrepresents solution:');
+  // https://www.google.com/maps/dir/52.3557827,4.9557282/52.36981757482324,+4.880850114081587/The+North+Face+Amsterdam+-+Urban+Exploration,+Wolvenstraat,+Amsterdam/@52.3624346,4.8995718,14z/data=!3m1!4b1!4m13!4m12!1m0!1m3!2m2!1d4.8808501!2d52.3698176!1m5!1m1!1s0x47c60936979f07ab:0x8794e8984cdad60b!2m2!1d4.886154!2d52.3704014!3e0
+  let url = 'https://www.google.com/maps/dir';
+  bestAgent.genome.forEach((val) => {
+    console.log(`${points[val].x}, ${points[val].y}\t${points[val].name}`);
+
+    url += `/${points[val].x},${points[val].y}`;
+  });
+  console.log(`\n${url}`);
+  console.log(`\nfitness: ${bestAgent.fitness}`);
   // TODO: write csv of stats to file!
 })();
