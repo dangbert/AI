@@ -1,7 +1,46 @@
-class Document:
 
-    # read data from the input file
-    def load(self, input_file):
+SYMBOLS = [
+    '~',
+    '`',
+    '!',
+    '@',
+    '#',
+    '$',
+    '%',
+    '^',
+    '&',
+    '*',
+    '(',
+    ')',
+    '-',
+    '_',
+    '+',
+    '=',
+    '{',
+    '}',
+    '[',
+    ']',
+    '|',
+    '\\',
+    ':',
+    ';',
+    '\'',
+    '"',
+    ',',
+    '.',
+    '<',
+    '>',
+    '?',
+    '/',
+    '€',
+]
+SYMBOLS_STR = ''.join(SYMBOLS)
+
+class Document:
+    """Tracks a list of words (and their distributions) within a single file."""
+
+    def load(self, input_file, ignoreCase=True, stripSymbols=True):
+        """read input_file and store stats."""
         self._name = input_file
         self._dist = {}                         # word distribution
         self._numWords = 0
@@ -13,18 +52,23 @@ class Document:
 
             self._numWords = len(words)
             for word in words:
+                if ignoreCase:
+                    word = word.lower()
+                # strip symbols:
+                if stripSymbols:
+                    word = ''.join(c for c in word if c not in SYMBOLS_STR)
+                word = word.strip()
                 if word not in self._dist:
                     self._dist[word] = 0
                 self._dist[word] += 1
         f.close()
 
-
     def contains(self, word):
+        """return True if this Document contains the given word."""
         return word in self._dist
 
-
-    # return the term frequency of a given word in this document
     def getTf(self, word):
-        if word not in self._dist:
+        """return the frequency (float in range [0,1]) of a given word in this Document."""
+        if word not in self._dist or self._numWords == 0:
             return 0
         return self._dist[word] / self._numWords

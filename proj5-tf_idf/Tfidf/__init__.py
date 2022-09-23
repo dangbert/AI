@@ -33,10 +33,10 @@ class Tfidf:
         arr = arr[:n]                           # get the first n elements of the array
 
         if print_results:
-            print("Top words in document " + fname)
+            print(f"'{fname}' top {len(arr)} words:")
             for tup in arr:
                 s = "{:.5f}".format(tup[1])
-                print("Word: " + tup[0] + ", TF-IDF: " + s)
+                print(f"'{tup[0]}'\t(TF_IDF: {s})")
 
         return arr
 
