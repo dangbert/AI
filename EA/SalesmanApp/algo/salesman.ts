@@ -160,7 +160,7 @@ export interface FitnessStats {
  * @param config
  * @param statusCallback callback to pass state of experiment after each generation completes.
  */
-export const runExperiment = async (
+export const runExperiment = (
   points: Point[],
   config: ExperimentConfig,
   statusCallback: (stats: ExperimentStats) => void
@@ -214,7 +214,6 @@ export const runExperiment = async (
       population: pop,
       bestAgent: bestAgent,
     };
-    console.log('calling satusCallback!');
     statusCallback(stats);
 
     // mutate agents (swap 2 elements in genome with a low probability)
@@ -244,14 +243,12 @@ export const runExperiment = async (
   console.log(bestAgent);
 
   console.log('\nrepresents solution:');
-  /*
-  let url = 'https://www.google.com/maps/dir';
+  //let url = 'https://www.google.com/maps/dir';
   bestAgent.genome.forEach((val) => {
     console.log(`${points[val].x}, ${points[val].y}\t${points[val].name}`);
-
-    url += `/${points[val].x},${points[val].y}`;
+    //url += `/${points[val].x},${points[val].y}`;
   });
-  */
+
   const url = bestAgent.toUrl(points);
   console.log(`\n${url}`);
   console.log(`\nfitness: ${bestAgent.fitness}`);

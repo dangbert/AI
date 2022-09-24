@@ -39,6 +39,7 @@ export default class Agent {
       //console.log(`${points[val].x}, ${points[val].y}\t${points[val].name}`);
       url += `/${points[val].x},${points[val].y}`;
     });
+    console.log('created url: ' + url);
     return url;
   }
 

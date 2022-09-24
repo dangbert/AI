@@ -18,19 +18,19 @@ import {
   runExperiment,
   examplePoints,
 } from './algo/salesman';
+import * as Clipboard from 'expo-clipboard';
 
 const safeParse = (text: string, callback: (val: number) => void) => {
-  try {
-    const num = parseInt(text);
+  const num = parseInt(text);
+  if (!isNaN(num)) {
     callback(num);
-  } catch (e) {}
+  }
 };
 
 interface SalesmanProps {}
 
 const Salesman: React.FC<SalesmanProps> = ({}) => {
   const [points, setPoints] = useState<Point[]>(examplePoints);
-
   // config
   //   TODO: use ExperimentConfig
   const [maxGenerations, setMaxGenerations] = useState(30);
@@ -40,32 +40,12 @@ const Salesman: React.FC<SalesmanProps> = ({}) => {
 
   // stats
   const [stats, setStats] = useState<ExperimentStats | undefined>(undefined);
-  //const [stats, setStats] = useState<ExperimentStats | undefined>({
-  //  running: true,
-  //  curGeneration: 555,
-  //  fitStats: {
-  //    max: 66,
-  //    avg: 66,
-  //    min: 66,
-  //  },
-  //  population: [],
-  //  bestAgent: new Agent(2),
-  //});
-
   const running = stats?.running || false;
 
-  //const statusCallback = useCallback(
-  //  () => (stats: ExperimentStats) => {
-  //    console.log('*****in satusCallback!*****');
-  //    setStats(stats);
-  //  },
-  //  []
-  //);
-
-  const statusCallback = () => (stats: ExperimentStats) => {
+  const statusCallback = useCallback((stats: ExperimentStats) => {
     console.log('*****in statusCallback!*****');
     setStats(stats);
-  };
+  }, []);
 
   return (
     <SafestAreaView style={styles.container}>
@@ -129,6 +109,8 @@ const Salesman: React.FC<SalesmanProps> = ({}) => {
                   probMutation,
                 };
                 console.log('starting experiment');
+                setStats(undefined);
+                // TODO: use https://reactnative.dev/docs/interactionmanager
                 runExperiment(points, config, statusCallback);
               }}
             />
@@ -160,15 +142,14 @@ const Salesman: React.FC<SalesmanProps> = ({}) => {
                       </Text>
                     </View>
 
-                    <View style={styles.row}>
+                    <View style={[styles.row, { marginTop: 24 }]}>
                       <Button
                         title="View Best Solution"
                         onPress={() => {
                           // https://stackoverflow.com/a/48006762
                           // TODO: try https://github.com/includable/react-native-map-link
-                          // TODO: don't hardcode
-                          const rawUrl =
-                            'https://www.google.com/maps/dir/52.35578270872273,4.955728233775735/52.36981757482324,4.880850114081587/52.358066655876875,4.868508923865922/52.33974766878963,4.842427613789914/52.33376991193947,4.865569696293274/52.33137852041053,4.868057053740658/52.32144690826629,4.872101596511191/52.31184849364095,4.84772881995548/52.30112397858448,4.844430244769097';
+                          // const rawUrl =
+                          // 'https://www.google.com/maps/dir/52.35578270872273,4.955728233775735/52.36981757482324,4.880850114081587/52.358066655876875,4.868508923865922/52.33974766878963,4.842427613789914/52.33376991193947,4.865569696293274/52.33137852041053,4.868057053740658/52.32144690826629,4.872101596511191/52.31184849364095,4.84772881995548/52.30112397858448,4.844430244769097';
                           // const scheme = Platform.select({
                           // ios: 'maps:0,0?q=',
                           // android: 'geo:0,0?q=',
@@ -176,6 +157,16 @@ const Salesman: React.FC<SalesmanProps> = ({}) => {
                           Linking.openURL(bestAgent.toUrl(points)).catch(
                             (err) => Alert.alert(err)
                           );
+                        }}
+                      />
+                    </View>
+
+                    <View style={[styles.row, { marginTop: 12 }]}>
+                      <Button
+                        title="Copy Link"
+                        onPress={async () => {
+                          const url = bestAgent.toUrl(points);
+                          await Clipboard.setStringAsync(url);
                         }}
                       />
                     </View>
