@@ -68,7 +68,7 @@ class Document:
         return word in self._dist
 
     def getTf(self, word):
-        """return the frequency (float in range [0,1]) of a given word in this Document."""
+        """return the term frequency (float in range [0,1]) of a given word in this Document."""
         if word not in self._dist or self._numWords == 0:
             return 0
         return self._dist[word] / self._numWords
