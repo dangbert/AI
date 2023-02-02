@@ -1,4 +1,5 @@
 
+# TODO: note that string.punctuation exists: https://www.geeksforgeeks.org/string-punctuation-in-python/
 SYMBOLS = [
     '~',
     '`',
